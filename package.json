@@ -1,0 +1,22 @@
+{
+  "name": "dronetracer",
+  "version": "1.0.0",
+  "description": "Javascript-based library for generating drone-flyable SVG artwork",
+  "author": "",
+  "private": true,
+  "scripts": {
+    "test": "npm run build && mocha ./test/index.js",
+    "build": "webpack"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.2.0",
+    "@babel/preset-env": "^7.2.0",
+    "babel-loader": "^8.0.4",
+    "chai": "^4.2.0",
+    "eslint": "^5.9.0",
+    "eslint-loader": "^2.1.1",
+    "mocha": "^5.2.0",
+    "webpack": "^4.27.0",
+    "webpack-cli": "^3.1.2"
+  }
+}

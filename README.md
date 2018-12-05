@@ -62,4 +62,6 @@ tracer.transform(
   console.log( 'result path: ', dronePaint.getSVGFile() )
   console.log( 'painting time: ', dronePaint.getEstimatedTime() )
 });
-...
+```
+## License
+TBD

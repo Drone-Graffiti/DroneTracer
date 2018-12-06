@@ -9,6 +9,7 @@ module.exports = {
 		path: path.resolve('dist'),
 		library: libraryName,
 		libraryTarget: 'umd',
+        libraryExport: 'default',
 		umdNamedDefine: true,
 		globalObject: "typeof self !== 'undefined' ? self : this",
 		filename: libraryName+'.js'

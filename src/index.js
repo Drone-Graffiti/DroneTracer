@@ -1,11 +1,12 @@
 import * as constants from './constants.js'
+import DronePaint from './dronepaint.js'
 
 const errorThrow = function(msg) {
     throw `DroneTracer, ${arguments.callee.caller.name} | ${msg}`
 }
 
 class DroneTracer {
-    constructor(options) {
+    constructor(options = {}) {
         // check required data
         for (let key of constants.requiredPaintingConfigParams) {
             if(options[key] === undefined) errorThrow(`parameter ${key} is required`)
@@ -27,8 +28,19 @@ class DroneTracer {
 
         progress(0)
 
-        return new Promise((resolve) => {  
-            setTimeout(() => resolve(transformOptions), 1000)
+        return new Promise((resolve) => {
+            // TODO: calculate size/resolution of source
+            // TODO: implement transformation logic
+            // calculate transformations and create a DronePaint object
+            var svg = '<xml></xml>'
+            var dronePaint = new DronePaint(
+                this.paintingConfig,
+                transformOptions,
+                source,
+                svg
+            )
+
+            setTimeout(() => resolve(dronePaint), 300)
         })
     }
 }

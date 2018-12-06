@@ -40,5 +40,26 @@ describe('Library', () => {
         it('Should return a Promise', ()=> {
             tracer.transform({}).should.be.a('promise');
         })
+        it('Transform should return a valid DronePaint instance', async ()=> {
+            var image = {image: 101}
+            var dronePaint = await tracer.transform(image)
+
+            //console.log('DronePaint', dronePaint)
+            dronePaint.should.not.be.undefined
+            dronePaint.sourceImage.should.be.equals(image)
+            dronePaint.estimatedTime.should.be.equals(1000)
+        }).timeout(9000)
+    })
+
+    describe('#DronePaint object', () => {
+        var tracer = new DroneTracer({wallId: 1, gpsLocation: [0,0], dimensions: [0,0]})
+
+        it('Should not accept negative scaling factors', async ()=> {
+            var dronePaint = await tracer.transform({})
+
+            dronePaint.setPaintingScale(2)
+            dronePaint.setPaintingScale(0.3)
+            dronePaint.paintingScale.should.be.equals(2)
+        }).timeout(9000)
     })
 })

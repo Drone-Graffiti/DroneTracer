@@ -32,7 +32,6 @@ class DroneTracer {
         progress(0)
 
         return new Promise((resolve) => {
-            // TODO: check and read file -> throw error
             // TODO: calculate size/resolution of source
             // TODO: implement transformation logic
             // calculate transformations and create a DronePaint object

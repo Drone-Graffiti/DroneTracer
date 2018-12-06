@@ -3,7 +3,7 @@ const path = require('path');
 var libraryName = 'DroneTracer';
 
 module.exports = {
-	entry: path.resolve('src','index.js'),
+	entry: path.resolve('src','main.js'),
 
 	output: {
 		path: path.resolve('dist'),

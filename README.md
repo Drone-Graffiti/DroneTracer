@@ -34,8 +34,8 @@ Converts an input image into a svg drone paint
 
 ***Progress Function***: |*Optional*| Function callback that return the progress of the transformation  				process.
 
-
 ***Options object***: |*Optional*| Passes an object that overwrites default transformation parameters. *Parameters TBD*
+The **size** option (default 4m x 3m) is the desired size for the image to be traced on the wall. The size option will affect the resolution/detail of the traced svg.
 
 **Return**:
 The transform function returns a promise that resolves into the *dronePaint* object.
@@ -44,8 +44,17 @@ The transform function returns a promise that resolves into the *dronePaint* obj
 
 #### dronePaint object:
 
-This object, provides functions to access and modify related information to the svg for the drone.
-Relative positioning into the wall must be registered into the dronePaint.
+Provides functions to access and modify related information to the svg for the drone. This functions does not affect the transformation process.
+
+**setPaintingPosition(x, y):** Sets relative positioning inside the wall.
+
+**setPaintingScale(factor):** Transforms the scale of the generated SVG. *Only accepts positive numbers greater or equals than 1.*
+
+**svgFile:** Getter, svg drone path
+
+**sourceImage**: Getter, original source image
+
+**estimatedTime:** Getter, estimated painting time (milliseconds)
 
 
 
@@ -68,17 +77,26 @@ var tracer = new DroneTracer(paintingConfig)
 // Transform image into a flyable drone path
 tracer.transform(
   imagefile, // loaded File API
-  (progress) => { console.log(progress) }, // log progress
-  { threshold: 0.1 } // overwrite default threshold parameter
+  (progress) => { console.log(`${progress}%`) }, // log progress
+  { 
+    size: [5,8], // graffiti size in meters | default 4mx3m
+    color: 2,  // default 0. Color id from the paintingConfig color list
+    threshold: 0.1
+  }
 ).then( (dronePaint) => {
-  // The dronePaint object, provides functions to access and modify related information to the svg for the drone.
-  dronePaint.setPaintingPosition(12.1, 0.85)
-  dronePaint.setPaintingScale(2.5)
+  /* The dronePaint object, provides functions to access and modify
+   * related information to the svg for the drone.
+   * This functions does not affect the transformation process.
+   */
+  dronePaint.setPaintingPosition(12.1, 0.85) // default: middle of the wall
+  dronePaint.setPaintingScale(2.5) // post-scale the svg
   dronePaint.setPaintingData('dataName', 'datAvalue')
-  
-  console.log( 'result path: ', dronePaint.getSVGFile() )
-  console.log( 'painting time: ', dronePaint.getEstimatedTime() )
+
+  console.log( 'result path: ', dronePaint.svgFile )
+  console.log( 'image source: ', dronePaint.sourceImage )
+  console.log( 'painting time: ', dronePaint.estimatedTime )
 });
+
 ```
 
 

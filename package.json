@@ -17,6 +17,8 @@
     "chai": "^4.2.0",
     "eslint": "^5.9.0",
     "eslint-loader": "^2.1.1",
+    "file-api": "^0.10.4",
+    "mime": "1.4.1",
     "mocha": "^5.2.0",
     "uglifyjs-webpack-plugin": "^2.0.1",
     "webpack": "^4.27.0",

@@ -5,22 +5,27 @@ var env = process.env.WEBPACK_ENV || 'build'
 
 var libraryName = 'DroneTracer'
 
-var envMode, outputFile, outputPath, optimizations = {}
+var envMode, entry = [], outputFile, outputPath, optimizations = {}
+var mainjs = path.resolve('src', libraryName, 'main.js')
 outputPath = path.resolve('build')
 
 if (env === 'build') {
     envMode = 'production'
+    entry.push("@babel/polyfill", mainjs)
     outputFile = `${libraryName}.min.js`
     optimizations.minimizer = [new UglifyJsPlugin()]
 }
 else {
     envMode = 'development'
+    entry.push(mainjs)
     outputFile = `${libraryName}.js`
 }
 
+console.log('entry: ', entry)
+
 
 module.exports = {
-	entry: path.resolve('src', libraryName, 'main.js'),
+	entry: entry, 
     devtool: 'source-map',
     mode: envMode,
 
@@ -53,4 +58,5 @@ module.exports = {
 			}
 		}]
 	}
+
 }

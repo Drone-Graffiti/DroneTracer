@@ -3,7 +3,8 @@ var assert = require('chai').assert
 var expect = require('chai').expect
 var should = require('chai').should()
 
-var DroneTracer = require('../build/DroneTracer.min.js')
+// use non polyfill version
+var DroneTracer = require('../build/DroneTracer.js')
 
 describe('Library', () => {
 	describe('#require', () => {

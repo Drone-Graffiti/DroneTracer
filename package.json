@@ -8,7 +8,7 @@
     "dev": "WEBPACK_ENV=dev webpack --progress --colors --watch",
     "build": "webpack",
     "release": "npm run build && ./scripts/runrelease.sh",
-    "test": "npm run build && mocha ./test/index.js"
+    "test": "WEBPACK_ENV=dev npm run build && mocha ./test/index.js"
   },
   "devDependencies": {
     "@babel/core": "^7.2.0",
@@ -21,5 +21,8 @@
     "uglifyjs-webpack-plugin": "^2.0.1",
     "webpack": "^4.27.0",
     "webpack-cli": "^3.1.2"
+  },
+  "dependencies": {
+    "@babel/polyfill": "^7.0.0"
   }
 }

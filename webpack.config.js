@@ -5,22 +5,31 @@ var env = process.env.WEBPACK_ENV || 'build'
 
 var libraryName = 'DroneTracer'
 
-var envMode, outputFile, outputPath, optimizations = {}
+var envMode, entry = [], outputFile, outputPath, optimizations = {}, babelplugins = []
+var mainjs = path.resolve('src', libraryName, 'main.js')
 outputPath = path.resolve('build')
 
 if (env === 'build') {
     envMode = 'production'
+    entry.push('@babel/polyfill', mainjs)
     outputFile = `${libraryName}.min.js`
     optimizations.minimizer = [new UglifyJsPlugin()]
 }
 else {
     envMode = 'development'
+    entry.push(mainjs)
+    // use generator for dev and test and not polyfill async
+    //babelplugins.push('@babel/plugin-transform-async-to-generator')
     outputFile = `${libraryName}.js`
 }
 
+console.log('entry: ', entry)
+console.log('output: ', outputFile)
+console.log('babel plugins: ', babelplugins)
+
 
 module.exports = {
-	entry: path.resolve('src', libraryName, 'main.js'),
+	entry: entry, 
     devtool: 'source-map',
     mode: envMode,
 
@@ -30,7 +39,7 @@ module.exports = {
 		libraryTarget: 'umd',
         libraryExport: 'default',
 		umdNamedDefine: true,
-		globalObject: "typeof self !== 'undefined' ? self : this",
+        globalObject: "typeof self !== 'undefined' ? self : this",
 		filename: outputFile
 	},
 
@@ -48,9 +57,11 @@ module.exports = {
 			use: {
 				loader: 'babel-loader',
 				options: {
-					presets: ['@babel/preset-env']
+					presets: ['@babel/preset-env'],
+                    plugins: babelplugins
 				}
 			}
 		}]
 	}
+
 }

@@ -1,9 +1,8 @@
-import * as constants from './constants.js'
-import DronePaint from './dronepaint.js'
+import * as constants from './constants'
+import DronePaint from './dronepaint'
+import {readImage, isAnImageFile} from './filereader'
+import * as helper from './helper'
 
-const errorThrow = function(msg) {
-    throw `DroneTracer, ${arguments.callee.caller.name} | ${msg}`
-}
 
 // TODO: dev /vs/ release logic
 // dis/examples
@@ -12,7 +11,7 @@ class DroneTracer {
     constructor(options = {}) {
         // check required data
         for (let key of constants.requiredPaintingConfigParams) {
-            if(options[key] === undefined) errorThrow(`parameter ${key} is required`)
+            if(options[key] === undefined) helper.throw(`parameter ${key} is required`)
         }
         // merge options with default configuration
         this.paintingConfig = Object.assign({}, constants.defaultPaintingConfig, options)
@@ -26,12 +25,16 @@ class DroneTracer {
     // Method
     transform(source, progress = ()=>{}, options = {}) {
         // check parameters
-        if (source === undefined) errorThrow('source image is required. |Image API|')
+        if (source === undefined) helper.throw('source image is required. |Image API|')
         var transformOptions = Object.assign({}, constants.defaultTransformOptions, options)
 
         progress(0)
 
-        return new Promise((resolve) => {
+        return new Promise( async (resolve, reject) => {
+            if(!isAnImageFile(source)) helper.reject(reject, 'Not an image file')
+
+            var imageFile = await readImage(source)
+
             // TODO: calculate size/resolution of source
             // TODO: implement transformation logic
             // calculate transformations and create a DronePaint object
@@ -39,11 +42,11 @@ class DroneTracer {
             var dronePaint = new DronePaint(
                 this.paintingConfig,
                 transformOptions,
-                source,
+                imageFile,
                 svg
             )
 
-            setTimeout(() => resolve(dronePaint), 300)
+            resolve(dronePaint)
         })
     }
 }

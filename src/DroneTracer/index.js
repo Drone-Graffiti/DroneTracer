@@ -5,6 +5,9 @@ const errorThrow = function(msg) {
     throw `DroneTracer, ${arguments.callee.caller.name} | ${msg}`
 }
 
+// TODO: dev /vs/ release logic
+// dis/examples
+
 class DroneTracer {
     constructor(options = {}) {
         // check required data
@@ -29,6 +32,7 @@ class DroneTracer {
         progress(0)
 
         return new Promise((resolve) => {
+            // TODO: check and read file -> throw error
             // TODO: calculate size/resolution of source
             // TODO: implement transformation logic
             // calculate transformations and create a DronePaint object

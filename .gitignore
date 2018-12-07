@@ -2,5 +2,7 @@
 node_modules/
 
 # build output
+build/
+
 # release dist on master version
-#dist/
+dist/

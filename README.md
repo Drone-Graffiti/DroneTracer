@@ -111,10 +111,26 @@ $ npm install
 
 
 
-#### Build
+#### Dev watch
 
 ```bash
-$ npm run build
+$ npm run dev
+```
+
+
+
+#### Run test
+
+```bash
+$ npm test
+```
+
+
+
+#### Build Release version
+
+```bash
+$ npm run rlease
 ```
 
 

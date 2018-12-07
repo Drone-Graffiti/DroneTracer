@@ -1,8 +1,9 @@
+// TODOD: test Library and test src files | test DronePaint , tracing logic
 var assert = require('chai').assert
 var expect = require('chai').expect
 var should = require('chai').should()
 
-var DroneTracer = require('../dist/DroneTracer.js')
+var DroneTracer = require('../build/DroneTracer.min.js')
 
 describe('Library', () => {
 	describe('#require', () => {

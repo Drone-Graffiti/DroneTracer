@@ -3,3 +3,6 @@ node_modules/
 
 # build output
 build/
+
+# ignore dist on development branch
+dist/

@@ -1,7 +1,8 @@
 import * as constants from './constants'
 import DronePaint from './dronepaint'
-import {readImage, isAnImageFile} from './filereader'
+import { readImage, isAnImageFile } from './filereader'
 import * as helper from './helper'
+import { base64ToImageData, trace } from './svgtracer'
 
 
 // TODO: dev /vs/ release logic
@@ -35,10 +36,15 @@ class DroneTracer {
 
             var imageFile = await readImage(source)
 
+            // TEMP svg tracer
+            var imageData = await base64ToImageData(imageFile)
+            var svgOutput = trace(imageData)
+
+
             // TODO: calculate size/resolution of source
             // TODO: implement transformation logic
             // calculate transformations and create a DronePaint object
-            var svg = '<xml></xml>'
+            var svg = svgOutput
             var dronePaint = new DronePaint(
                 this.paintingConfig,
                 transformOptions,

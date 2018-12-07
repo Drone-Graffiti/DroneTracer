@@ -1,6 +1,6 @@
 const calculateEstimatedTime = function(svg) {
     svg = 0
-    return 1000 + svg
+    return 3 * 60 * 1000 + svg
 } 
 
 // Drone Paint provides functions to access and modify related information to the svg for the drone

@@ -8,5 +8,5 @@ global.FileReader = FileAPI.FileReader
 
 
 module.exports.createFile = function(url) {
-    return new File(`${__dirname}/files/${url}`)
+    return new File(`${__dirname}/../files/${url}`)
 }

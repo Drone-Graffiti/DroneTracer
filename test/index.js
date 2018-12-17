@@ -1,15 +1,17 @@
-// TODOD: test Library and test src files | test DronePaint , tracing logic
 var assert = require('chai').assert
 var expect = require('chai').expect
 var should = require('chai').should()
-var fileAPI = require('./file')
 
+var fileAPI = require('./polyfills/file')
+import {Image} from './polyfills/image'
+global.Image = Image
 
 require('@babel/polyfill')
-// use non polyfill version
-var DroneTracer = require('../build/DroneTracer.js')
+var DroneTracer = require('../src/DroneTracer/main.js').default
 
 var imageFile = fileAPI.createFile('ufo.jpg')
+//var imageFile = require('./polyfills/base64File')
+
 
 describe('Library', () => {
 	describe('#require', () => {
@@ -39,7 +41,6 @@ describe('Library', () => {
             expect(tracer.transform).to.throw()
 
             var callTransform = function() {
-                var image = {}
                 tracer.transform(imageFile)
             }
             expect(callTransform).to.not.throw()

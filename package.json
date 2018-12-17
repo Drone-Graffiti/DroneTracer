@@ -8,11 +8,12 @@
     "dev": "WEBPACK_ENV=dev webpack --progress --colors --watch",
     "build": "webpack",
     "release": "npm run build && ./scripts/runrelease.sh",
-    "test": "WEBPACK_ENV=dev npm run build && mocha ./test/index.js"
+    "test": "mocha --require @babel/register ./test/index.js"
   },
   "devDependencies": {
     "@babel/core": "^7.2.0",
     "@babel/preset-env": "^7.2.0",
+    "@babel/register": "^7.0.0",
     "babel-loader": "^8.0.4",
     "chai": "^4.2.0",
     "eslint": "^5.9.0",

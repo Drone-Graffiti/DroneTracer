@@ -5,9 +5,6 @@ import * as helper from './helper'
 import { base64ToImageData, trace } from './svgtracer'
 
 
-// TODO: dev /vs/ release logic
-// dis/examples
-
 class DroneTracer {
     constructor(options = {}) {
         // check required data
@@ -18,12 +15,8 @@ class DroneTracer {
         this.paintingConfig = Object.assign({}, constants.defaultPaintingConfig, options)
     }
 
-    // Getter
-    get working() {
-        return this.paintingConfig ? true : false
-    }
-
     // Method
+    // source could be an File API object or a base64 image (string)
     transform(source, progress = ()=>{}, options = {}) {
         // check parameters
         if (source === undefined) helper.throw('source image is required. |Image API|')
@@ -32,9 +25,14 @@ class DroneTracer {
         progress(0)
 
         return new Promise( async (resolve, reject) => {
-            if(!isAnImageFile(source)) helper.reject(reject, 'Not an image file')
+            var imageFile
 
-            var imageFile = await readImage(source)
+            if(typeof(source) === 'string') imageFile = source 
+
+            else {
+                if(!isAnImageFile(source)) helper.reject(reject, 'Not an image file')
+                imageFile = await readImage(source)
+            }
 
             // TEMP svg tracer
             var imageData = await base64ToImageData(imageFile)
@@ -43,6 +41,7 @@ class DroneTracer {
 
             // TODO: calculate size/resolution of source
             // TODO: implement transformation logic
+
             // calculate transformations and create a DronePaint object
             var svg = svgOutput
             var dronePaint = new DronePaint(

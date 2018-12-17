@@ -7,18 +7,15 @@
   "scripts": {
     "dev": "WEBPACK_ENV=dev webpack --progress --colors --watch",
     "build": "webpack",
-    "release": "npm run build && ./scripts/runrelease.sh",
-    "test": "mocha --require @babel/register ./test/index.js"
+    "release": "npm run build && ./scripts/runrelease.sh"
   },
   "devDependencies": {
     "@babel/core": "^7.2.0",
     "@babel/preset-env": "^7.2.0",
-    "@babel/register": "^7.0.0",
     "babel-loader": "^8.0.4",
     "chai": "^4.2.0",
     "eslint": "^5.9.0",
     "eslint-loader": "^2.1.1",
-    "file-api": "^0.10.4",
     "mime": "1.4.1",
     "mocha": "^5.2.0",
     "uglifyjs-webpack-plugin": "^2.0.1",

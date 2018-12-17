@@ -1,8 +1,8 @@
-import * as constants from './constants'
-import DronePaint from './dronepaint'
-import { readImage, isAnImageFile } from './filereader'
-import * as helper from './helper'
-import { base64ToImageData, trace } from './svgtracer'
+import * as constants from './constants.js'
+import DronePaint from './dronepaint.js'
+import { readImage, isAnImageFile } from './filereader.js'
+import * as helper from './helper.js'
+import { base64ToImageData, trace } from './svgtracer.js'
 
 
 class DroneTracer {

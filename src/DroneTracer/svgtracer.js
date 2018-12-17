@@ -1,4 +1,13 @@
-import * as tracer from '../libs/imagetracer.js'
+// load in Webpack Node and Browser
+import '../libs/imagetracer.js'
+import * as ImageTracer from '../libs/imagetracer.js'
+
+var tracer = {}
+if (ImageTracer.versionnumber === undefined)
+    tracer = self.ImageTracer
+else
+    tracer = ImageTracer
+
 
 export const base64ToImageData = function(base64) {
     return new Promise( async (resolve) => {

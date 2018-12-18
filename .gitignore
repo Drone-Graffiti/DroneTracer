@@ -6,3 +6,7 @@ build/
 
 # ignore dist on development branch
 dist/
+
+# ignore test links
+test/node_modules
+test/src

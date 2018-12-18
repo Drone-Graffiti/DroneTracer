@@ -7,7 +7,8 @@
   "scripts": {
     "dev": "WEBPACK_ENV=dev webpack --progress --colors --watch",
     "build": "webpack",
-    "release": "npm run build && ./scripts/runrelease.sh"
+    "release": "npm run build && ./scripts/runrelease.sh",
+    "test": "./scripts/test.sh"
   },
   "devDependencies": {
     "@babel/core": "^7.2.0",

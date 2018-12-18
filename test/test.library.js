@@ -3,7 +3,7 @@ var expect = chai.expect
 var should = chai.should()
 
 import DroneTracer from '/src/DroneTracer/main.js'
-import imageFile from '/test/files/base64File.js'
+import imageFile from '/files/base64File.js'
 
 
 describe('Library', () => {

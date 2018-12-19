@@ -94,10 +94,10 @@ class LineTracer {
 		for(let y = 1; y < lh; y++) {
 			for(let x = 1; x < lw; x++) {
 			    nodeLayer[y][x] =
-					( colorLayer[y-1][x-1]=== this.colorIdentifier ? 1 : 0 ) +
-					( colorLayer[y-1][x]  === this.colorIdentifier ? 2 : 0 ) +
-					( colorLayer[y][x-1]  === this.colorIdentifier ? 8 : 0 ) +
-					( colorLayer[y][x]    === this.colorIdentifier ? 4 : 0 )
+					( colorLayer[y-1][x]  === this.colorIdentifier ? 1 : 0 ) +
+					( colorLayer[y-1][x-1]=== this.colorIdentifier ? 2 : 0 ) +
+					( colorLayer[y][x]    === this.colorIdentifier ? 4 : 0 ) +
+					( colorLayer[y][x-1]  === this.colorIdentifier ? 8 : 0 )
 			}
 		}
 
@@ -110,9 +110,9 @@ class LineTracer {
      */
 
 	// Edge node types ( ▓: this layer or 1; ░: not this layer or 0 )
-	// 12  ░░  ▓░  ░▓  ▓▓  ░░  ▓░  ░▓  ▓▓  ░░  ▓░  ░▓  ▓▓  ░░  ▓░  ░▓  ▓▓
-	// 48  ░░  ░░  ░░  ░░  ░▓  ░▓  ░▓  ░▓  ▓░  ▓░  ▓░  ▓░  ▓▓  ▓▓  ▓▓  ▓▓
-	//     0   1   2   3   4   5   6   7   8   9   10  11  12  13  14  15
+	//  ░░  ░▓  ▓░  ▓▓  ░░  ░▓  ▓░  ▓▓  ░░  ░▓  ▓░  ▓▓  ░░  ░▓  ▓░  ▓▓
+	//  ░░  ░░  ░░  ░░  ░▓  ░▓  ░▓  ░▓  ▓░  ▓░  ▓░  ▓░  ▓▓  ▓▓  ▓▓  ▓▓
+	//  0   1   2   3   4   5   6   7   8   9   10  11  12  13  14  15
 
     static pathNodeScan(nodeLayer) {
         var paths = [],
@@ -175,6 +175,7 @@ class LineTracer {
 
 LineTracer.colorIdentifier = 1
 LineTracer.minimunPathLength = 6
+// TODO: change LookupTables to match new edge logic. 
 LineTracer.pathNode_lookup = [
     [[-1,-1,-1,-1], [-1,-1,-1,-1], [-1,-1,-1,-1], [-1,-1,-1,-1]],// node type 0 is invalid
     [[ 0, 1, 0,-1], [-1,-1,-1,-1], [-1,-1,-1,-1], [ 0, 2,-1, 0]],

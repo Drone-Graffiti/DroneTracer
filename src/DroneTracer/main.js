@@ -2,7 +2,8 @@ import * as constants from './constants.js'
 import DronePaint from './dronepaint.js'
 import { readImage, isAnImageFile } from './filereader.js'
 import * as helper from './helper.js'
-import { base64ToImageData, trace, LineTracer } from './svgtracer.js'
+//import { base64ToImageData, trace, LineTracer } from './svgtracer.js'
+import { base64ToImageData, trace } from './svgtracer.js'
 
 
 class DroneTracer {
@@ -38,13 +39,12 @@ class DroneTracer {
             var imageData = await base64ToImageData(imageFile)
             var svgOutput = trace(imageData)
 
-/*
- *            var colorLayer = LineTracer.extractColorLayer(imageData)
- *            console.log('color layer', colorLayer)
- *
- *            var nodeLayer = LineTracer.edgeAnalysis(colorLayer)
- *            console.log('node layer', nodeLayer)
- */
+            /*
+             *var colorLayer = LineTracer.extractColorLayer(imageData)
+             *console.log('color layer', colorLayer)
+             *var nodeLayer = LineTracer.edgeAnalysis(colorLayer)
+             *console.log('node layer', nodeLayer)
+             */
 
 
             // TODO: calculate size/resolution of source

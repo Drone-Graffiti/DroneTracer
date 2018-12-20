@@ -39,7 +39,8 @@ describe('svg Tracing', async () => {
 
             nodeLayer[1][1].should.be.equals(4)     // top corner
             nodeLayer[2][2].should.be.equals(11)    // top inside corner
-            nodeLayer[4][4].should.be.equals(1)     // bottom corner
+            nodeLayer[4][4].should.be.equals(2)     // bottom corner
+            nodeLayer[1][2].should.be.equals(12)     // bottom corner
 		})
 
 		it('Should find path', async () => {
@@ -48,7 +49,7 @@ describe('svg Tracing', async () => {
             var paths = LineTracer.pathNodeScan(nodeLayer)
 
             // should find one single black path (square shape)
-            path.length.should.be.equals(1)
+            paths.length.should.be.equals(1)
 		})
 	})
 })

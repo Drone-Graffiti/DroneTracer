@@ -16,12 +16,18 @@ describe('Image Decoder', () => {
 })
 
 describe('svg Tracing', async () => {
-        var smallImageFile = `data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAMAAAADCAYAAABWKLW/AAAACXBIWXMAAFxGAABcRgEUlENBAAAAHUlEQVQIHWNkYGD4D8RgwAQi//+H8BlBbLAwkAAAaCcFAP1akycAAAAASUVORK5CYII=` 
-        var imageData = await base64ToImageData(smallImageFile)
+        var smallImageFile = `data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAMAAAADCAYAAABWKLW/AAAACXBIWXMAAFxGAABcRgEUlENBAAAAHUlEQVQIHWNkYGD4D8RgwAQi//+H8BlBbLAwkAAAaCcFAP1akycAAAAASUVORK5CYII=`
+        var smallImageData = await base64ToImageData(smallImageFile)
+
+        var mediumImageFile = `data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAYAAAAGCAYAAADgzO9IAAAACXBIWXMAAFxGAABcRgEUlENBAAAAMklEQVQIHWP8DwQMWAALSIyRkRFFCqSWCSYC4iBrhkvAdMEkwRIwDkw3iAYZDrYcXRIABIgW/EUU+SMAAAAASUVORK5CYII=`
+        var mediumImageData = await base64ToImageData(mediumImageFile)
+
+        var complexImageFile = `data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAwAAAAMCAYAAABWdVznAAAACXBIWXMAAFxGAABcRgEUlENBAAAAbklEQVQoFX2QWw7AIAgEpen9r2w7mjUU1/KhPHYAjf5aMxYRzZVutBSrIXbQABC7brUJ8QJyURNdEws4oRpeONpXSd2apJh7ADgniFq2BeQkvvsh8tsbtIbeoRgxuQ8gEUXMTTmuNJH9/AXqRPAHLfouF64EwTYAAAAASUVORK5CYII=`
+        var complexImageData = await base64ToImageData(complexImageFile)
 
 	describe('LineTracer', () => {
 		it('Should pull out color layer', () => {
-            var colorLayer = LineTracer.extractColorLayer(imageData)
+            var colorLayer = LineTracer.extractColorLayer(smallImageData)
             // image width / height + 2 (1 pixel per border)
             colorLayer.length.should.be.equals(5)
             colorLayer[0].length.should.be.equals(5)
@@ -31,7 +37,7 @@ describe('svg Tracing', async () => {
 		})
 
 		it('Should find analysis edges as nodes', () => {
-            var colorLayer = LineTracer.extractColorLayer(imageData)
+            var colorLayer = LineTracer.extractColorLayer(smallImageData)
             var nodeLayer = LineTracer.edgeAnalysis(colorLayer)
             // same side as colorLayer
             nodeLayer.length.should.be.equals(5)
@@ -44,7 +50,7 @@ describe('svg Tracing', async () => {
 		})
 
 		it('Should find path', async () => {
-            var colorLayer = LineTracer.extractColorLayer(imageData)
+            var colorLayer = LineTracer.extractColorLayer(smallImageData)
             var nodeLayer = LineTracer.edgeAnalysis(colorLayer)
             var paths = LineTracer.pathNodeScan(nodeLayer)
 
@@ -61,6 +67,44 @@ describe('svg Tracing', async () => {
                 {x: 1, y: 2, t: 5}
             ]
             paths[0].should.be.eql(expected_path)
+		})
+
+		it('Should find 2 directions path', async () => {
+            var colorLayer = LineTracer.extractColorLayer(mediumImageData)
+            var nodeLayer = LineTracer.edgeAnalysis(colorLayer)
+            var paths = LineTracer.pathNodeScan(nodeLayer)
+
+            // should find one single black path (square shape)
+            paths.length.should.be.equals(1)
+            var expected_path = [
+                {x: 1, y: 6, t: 4},
+                {x: 2, y: 6, t: 12},
+                {x: 3, y: 5, t: 7},
+                {x: 3, y: 4, t: 14},
+                {x: 2, y: 4, t: 5},
+                {x: 2, y: 3, t: 5},
+                {x: 2, y: 2, t: 4},
+                {x: 3, y: 2, t: 12},
+                {x: 4, y: 2, t: 12},
+                {x: 5, y: 2, t: 12},
+                {x: 5, y: 3, t: 7}
+            ]
+            paths[0].should.be.eql(expected_path)
+		})
+
+		it('Should find complex path', async () => {
+            var colorLayer = LineTracer.extractColorLayer(complexImageData)
+            var nodeLayer = LineTracer.edgeAnalysis(colorLayer)
+            var paths = LineTracer.pathNodeScan(nodeLayer)
+
+            // should find one single black path (square shape)
+            paths.length.should.be.equals(2)
+            // TODO: fix bug 1 - 6 - 10
+            //paths[0].length.should.be.equals(22)
+            //paths[1].length.should.be.equals(5)
+            //var expected_path = [
+            //]
+            //paths[0].should.be.eql(expected_path)
 		})
 	})
 })

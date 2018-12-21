@@ -135,11 +135,13 @@ class LineTracer {
 
                     // if can not continue, search from the starting pixel in the
                     // opposite direction and concatenate the two outlines
+                    // reset starting edge node
+                    nodeLayer[y][x] = 4
                     // search path, following nodes and contrast, dir = 2
                     var left_path = this.findCenterline(x, y, nodeLayer, 2)
 
                     path = path.concat(right_path)
-                    path = left_path.concat(path)
+                    path = left_path.reverse().concat(path)
 
                     if( path.length >= this.minimunPathLength ) paths.push(path)
                 }
@@ -179,19 +181,20 @@ class LineTracer {
         for(let step = 0; step < 3 && !nodeFound; ++step) {
             var node = nodeLayer[ny][nx]
             if (node >= 0) {
-                var lookuprow = this.pathNode_lookup[ node ][ d ]
+                var lookupDir = this.pathNode_lookup[ node ][ d ]
+                var lookupPos = this.dirNode_lookup[ node ][ d ]
 
                 // replace node
-                nodeLayer[ny][nx] = lookuprow[0]
+                nodeLayer[ny][nx] = lookupDir[0]
             
                 // find new direction
-                d = lookuprow[1]
-                var pixelDirection = this.computeDirection(d)
+                d = lookupDir[1]
 
                 // compute new direction
-                nx += pixelDirection.x
-                ny += pixelDirection.y
+                nx += lookupPos[0]
+                ny += lookupPos[1]
 
+                var newNode = nodeLayer[ny][nx]
                 // is a valid node?
                 if( this.isValidNode(nodeLayer[ny][nx]) ) nodeFound = true
             }
@@ -199,56 +202,52 @@ class LineTracer {
         var ndir = nodeFound ? d : -1
         return {ndir, nx, ny}
     }
-
-    static computeDirection(dir) {
-        var pixelDir = {x: 0, y: 0}
-
-        switch(dir) {
-        case 0:
-            pixelDir.x = 1
-            pixelDir.y = 0
-            break
-        case 1:
-            pixelDir.x = 0
-            pixelDir.y = -1
-            break
-        case 2:
-            pixelDir.x = -1
-            pixelDir.y = 0
-            break
-        case 3:
-            pixelDir.x = 0
-            pixelDir.y = 1
-            break
-        }
-
-        return pixelDir
-    }
-
 }
 
 LineTracer.colorIdentifier = 1
 LineTracer.minimunPathLength = 6 // 8
 LineTracer.pathNode_lookup = [
     [[-1,-1], [-1,-1], [-1,-1], [-1,-1]], // node type 0 is invalid
-    [[-1,-1], [-1,-1], [ 0, 1], [ 0, 0]], // 1
+    [[-1,-1], [-1,-1], [ 0, 1], [ 0, 3]], // 1
     [[ 0, 1], [-1,-1], [-1,-1], [ 0, 2]], // 2
     [[ 0, 0], [-1,-1], [ 0, 2], [-1,-1]], // 3
 
     [[-1,-1], [ 0, 0], [ 0, 3], [-1,-1]], // 4
     [[-1,-1], [ 0, 1], [ 0, 1], [ 0, 3]], // 5
-    [[13, 3], [13, 2], [ 7, 1], [ 7, 0]], // 6 ??? check later
-    [[-1,-1], [ 0, 1], [ 0, 3], [ 0, 3]], // 7 ??? check later
+    [[14, 0], [14, 2], [ 0, 2], [ 0, 3]], // 6
+    [[ 0, 3], [ 0, 1], [ 0, 3], [ 0, 3]], // 7 ??? check later
 
-    [[ 0, 3], [ 0, 2], [-1,-1], [-1,-1]], // 8 // important, end of line! contrast? replace search?
-    [[11, 1], [14, 0], [14, 3], [11, 2]], // 9 ??? check later
-    [[-1,-1], [ 0, 2], [-1,-1], [ 0, 2]], // 10
+    [[ 0, 3], [ 0, 2], [-1,-1], [-1,-1]], // 8
+    [[ 0, 1], [ 0, 1], [11, 2], [ 0, 2]], // 9
+    [[ 0, 0], [ 0, 1], [-1,-1], [ 0, 3]], // 10
     [[-1,-1], [ 0, 2], [-1,-1], [-1,-1]], // 11??? check later
 
     [[ 0, 0], [-1,-1], [ 0, 2], [-1,-1]], // 12
     [[ 0, 1], [-1,-1], [-1,-1], [ 0, 2]], // 13??? check later
     [[-1,-1], [-1,-1], [ 0, 2], [ 0, 0]], // 14
     [[-1,-1], [-1,-1], [-1,-1], [-1,-1]]  // node type 15 is invalid
+]
+
+LineTracer.dirNode_lookup = [
+    [[ 0, 0], [ 0, 0], [ 0, 0], [ 0, 0]], // 0
+    [[-1,-1], [-1,-1], [ 0,-1], [ 1,-1]], // 1
+    [[ 0,-1], [-1,-1], [-1,-1], [-1, 0]], // 2
+    [[ 0,-1], [-1,-1], [ 0,-1], [-1,-1]], // 3
+
+    [[-1,-1], [ 1, 0], [ 0, 1], [-1,-1]], // 4
+    [[-1,-1], [ 0,-1], [ 0,-1], [ 0, 1]], // 5
+    [[ 1, 0], [ 0, 1], [ 0, 1], [ 0, 1]], // 6
+    [[ 0, 1], [ 0,-1], [ 0, 1], [ 0, 1]], // 7
+
+    [[ 0, 1], [-1, 0], [-1,-1], [-1,-1]], // 8
+    [[ 1, 0], [ 0, 1], [-1, 0], [-1, 0]], // 9
+    [[ 1, 0], [-1, 0], [-1,-1], [-1, 0]], // 10
+    [[-1,-1], [-1, 0], [-1,-1], [-1,-1]], // 11
+
+    [[ 1, 0], [-1,-1], [-1, 0], [-1,-1]], // 12
+    [[ 0, 1], [-1,-1], [-1,-1], [-1, 0]], // 13
+    [[-1,-1], [-1,-1], [-1, 0], [ 1, 0]], // 14
+    [[-1,-1], [-1,-1], [-1,-1], [-1,-1]]  // 15
 ]
 
 export {LineTracer}

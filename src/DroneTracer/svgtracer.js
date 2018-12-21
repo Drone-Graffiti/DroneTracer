@@ -114,6 +114,9 @@ class LineTracer {
     //  ░░  ░░  ░░  ░░  ░▓  ░▓  ░▓  ░▓  ▓░  ▓░  ▓░  ▓░  ▓▓  ▓▓  ▓▓  ▓▓
     //  0   1   2   3   4   5   6   7   8   9   10  11  12  13  14  15
 
+    // Node scan direction
+    //  0   1   2   3
+    //  >   ^   <   v
     static pathNodeScan(nodeLayer) {
         var paths = [],
             lh = nodeLayer.length,
@@ -124,57 +127,77 @@ class LineTracer {
 
                 // find starting edge
                 if( nodeLayer[y][x] == 4 ) {
-                    
-                    var px = x, py = y
-                    var dir = 1
-                    var pathfinished = false
-
                     var path = []
+                    path.push({ x: x, y: y, t: nodeLayer[y][x] })
 
-                    // Follow points from path. Path is finished when 2 ends has been found
-                    while(!pathfinished){
-                        
-                        path.push({ x: px-1, y: py-1, t: nodeLayer[py][px] })
+                    // seach path following nodes and contrast, dir = 1
+                    var right_path = this.findCenterline(x, y, nodeLayer, 1)
 
-                        // Next: look up the replacement, direction and coordinate
-                        // changes = clear this cell, turn if required, walk forward
-                        var lookuprow = this.pathNode_lookup[ nodeLayer[py][px] ][ dir ]
+                    // if can not continue, search from the starting pixel in the
+                    // opposite direction and concatenate the two outlines
+                    // search path, following nodes and contrast, dir = 2
+                    var left_path = this.findCenterline(x, y, nodeLayer, 2)
 
-                        // replace node
-                        nodeLayer[py][px] = lookuprow[0]
+                    path = path.concat(right_path)
+                    path = left_path.concat(path)
 
-                        // find new direction
-                        dir = lookuprow[1]
-                        var pixelDirection = this.computeDirection(dir)
-
-                        // compute new direction
-                        px += pixelDirection.x
-                        py += pixelDirection.y
-
-                        // when path is finished
-                        /*
-                         *if( (px-1 === path[0].x ) && ( py-1 === path[0].y ) ){
-                         *    pathfinished = true
-                         *    
-                         *    // Discarding paths shorter than minimun
-                         *    if( paths[pacnt].points.length < this.minimunPathLength ) path.pop()
-                         *    
-                         *}
-                         */
-                        pathfinished = true
-
-                        if (pathfinished) {
-                            paths.push(path)
-                        }
-                        
-                    }
-                    
-                } // end find starting node
-                
+                    if( path.length >= this.minimunPathLength ) paths.push(path)
+                }
             }
         }
         
         return paths    
+    }
+
+    static findCenterline(px, py, nodeLayer, dir) {
+        var path = []
+        var pathfinished = false
+        while(!pathfinished) {
+            // walk nodes and find next valid node
+            var {ndir,nx,ny} = this.nodeWalk(nodeLayer, dir, px, py)
+            if (ndir !==  -1) {
+                path.push({ x: nx, y: ny, t: nodeLayer[ny][nx] })
+                px = nx, py = ny, dir = ndir
+            } else {
+                // not valid node found
+                // TODO; contrast path finder with limit
+                pathfinished = true
+            }
+        }
+        return path
+    }
+
+    // valid nodes are nodes which core pixel is a colorLaye pixel
+    static isValidNode(node) {
+        var validNodes = [4,5,6,7,12,13,14]
+        return validNodes.includes(node)
+    }
+
+    static nodeWalk(nodeLayer, d, x, y) {
+        var nx = x, ny = y
+        var nodeFound = false
+        for(let step = 0; step < 3 && !nodeFound; ++step) {
+            var node = nodeLayer[ny][nx]
+            if (node >= 0) {
+                var lookuprow = this.pathNode_lookup[ node ][ d ]
+
+                // replace node
+                nodeLayer[ny][nx] = lookuprow[0]
+            
+                // find new direction
+                d = lookuprow[1]
+                var pixelDirection = this.computeDirection(d)
+
+                // compute new direction
+                nx += pixelDirection.x
+                ny += pixelDirection.y
+
+                // is a valid node?
+                if( this.isValidNode(nodeLayer[ny][nx]) ) nodeFound = true
+            }
+        }
+        var ndir = nodeFound ? d : -1
+        return {ndir, nx, ny}
     }
 
     static computeDirection(dir) {
@@ -205,10 +228,7 @@ class LineTracer {
 }
 
 LineTracer.colorIdentifier = 1
-LineTracer.minimunPathLength = 6
-// TODO: change LookupTables to match new edge logic. 
-// TODO: Lookup just dir and replace node | [x,y] done by dir logic.
-// RMBR: replace could be also a node number!!!
+LineTracer.minimunPathLength = 6 // 8
 LineTracer.pathNode_lookup = [
     [[-1,-1], [-1,-1], [-1,-1], [-1,-1]], // node type 0 is invalid
     [[-1,-1], [-1,-1], [ 0, 1], [ 0, 0]], // 1
@@ -216,9 +236,9 @@ LineTracer.pathNode_lookup = [
     [[ 0, 0], [-1,-1], [ 0, 2], [-1,-1]], // 3
 
     [[-1,-1], [ 0, 0], [ 0, 3], [-1,-1]], // 4
-    [[-1,-1], [ 0, 1], [-1,-1], [ 0, 3]], // 5
+    [[-1,-1], [ 0, 1], [ 0, 1], [ 0, 3]], // 5
     [[13, 3], [13, 2], [ 7, 1], [ 7, 0]], // 6 ??? check later
-    [[-1,-1], [ 0, 1], [ 0, 1], [ 0, 3]], // 7 ??? check later
+    [[-1,-1], [ 0, 1], [ 0, 3], [ 0, 3]], // 7 ??? check later
 
     [[ 0, 3], [ 0, 2], [-1,-1], [-1,-1]], // 8 // important, end of line! contrast? replace search?
     [[11, 1], [14, 0], [14, 3], [11, 2]], // 9 ??? check later
@@ -227,7 +247,7 @@ LineTracer.pathNode_lookup = [
 
     [[ 0, 0], [-1,-1], [ 0, 2], [-1,-1]], // 12
     [[ 0, 1], [-1,-1], [-1,-1], [ 0, 2]], // 13??? check later
-    [[-1,-1], [-1,-1], [ 0, 1], [ 0, 0]], // 14
+    [[-1,-1], [-1,-1], [ 0, 2], [ 0, 0]], // 14
     [[-1,-1], [-1,-1], [-1,-1], [-1,-1]]  // node type 15 is invalid
 ]
 

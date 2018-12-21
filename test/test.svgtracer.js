@@ -50,6 +50,17 @@ describe('svg Tracing', async () => {
 
             // should find one single black path (square shape)
             paths.length.should.be.equals(1)
+            var expected_path = [
+                {x: 1, y: 1, t: 4},
+                {x: 2, y: 1, t: 12},
+                {x: 3, y: 1, t: 12},
+                {x: 3, y: 2, t: 7},
+                {x: 3, y: 3, t: 13},
+                {x: 2, y: 3, t: 14},
+                {x: 1, y: 3, t: 5},
+                {x: 1, y: 2, t: 5}
+            ]
+            paths[0].should.be.eql(expected_path)
 		})
 	})
 })

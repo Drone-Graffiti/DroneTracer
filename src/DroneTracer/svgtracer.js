@@ -58,7 +58,7 @@ class LineTracer {
         // loop through all pixels
         for(let y = 0; y < imageData.height; y++ ){
             for(let x = 0; x < imageData.width; x++ ){
-                var index = (y*imageData.width+x)*4 // 4 values (RGBA)
+                var index = (y * imageData.width + x) * 4 // 4 values (RGBA)
 
                 // Linear interpolation | Taxicab geometry
                 var difference =
@@ -76,7 +76,7 @@ class LineTracer {
     }
 
 
-    // analyse the relationship of each pixel related with the neighbours
+    // analyse the relationship of each pixel related with the neighbors
     static edgeAnalysis(colorLayer) {
         var nodeLayer = [],
             lh = colorLayer.length,
@@ -117,10 +117,11 @@ class LineTracer {
     // Node scan direction
     //  0   1   2   3
     //  >   ^   <   v
-    static pathNodeScan(nodeLayer) {
+    static pathNodeScan(nodeLayer, sourceImage, colorLayer) {
         var paths = [],
             lh = nodeLayer.length,
             lw = nodeLayer[0].length
+
 
         for(var y = 0; y < lh; y++) {
             for(var x = 0; x < lw; x++) {
@@ -131,14 +132,14 @@ class LineTracer {
                     path.push({ x: x, y: y, t: nodeLayer[y][x] })
 
                     // seach path following nodes and contrast, dir = 1
-                    var right_path = this.findCenterline(x, y, nodeLayer, 1)
+                    var right_path = this.findCenterline(x, y, nodeLayer, 1, sourceImage, colorLayer)
 
                     // if can not continue, search from the starting pixel in the
                     // opposite direction and concatenate the two outlines
                     // reset starting edge node
                     nodeLayer[y][x] = 4
                     // search path, following nodes and contrast, dir = 2
-                    var left_path = this.findCenterline(x, y, nodeLayer, 2)
+                    var left_path = this.findCenterline(x, y, nodeLayer, 2, sourceImage, colorLayer)
 
                     path = path.concat(right_path)
                     path = left_path.reverse().concat(path)
@@ -151,7 +152,7 @@ class LineTracer {
         return paths    
     }
 
-    static findCenterline(px, py, nodeLayer, dir) {
+    static findCenterline(px, py, nodeLayer, dir, sourceImage, colorLayer) {
         var path = []
         var pathfinished = false
         while(!pathfinished) {
@@ -162,14 +163,16 @@ class LineTracer {
                 px = nx, py = ny, dir = ndir
             } else {
                 // not valid node found
-                // TODO; contrast path finder with limit
-                pathfinished = true
+                var contrastPath = this.findContrastPath(sourceImage, colorLayer, nodeLayer, nx, ny)
+                // finish the line if you can not find another centerline within the maximum length
+                if (contrastPath.length === 0) pathfinished = true
+                else path = path.concat(contrastPath)
             }
         }
         return path
     }
 
-    // valid nodes are nodes which core pixel is a colorLaye pixel
+    // valid nodes are nodes which core pixel is a colorLayer pixel
     static isValidNode(node) {
         var validNodes = [4,5,6,7,12,13,14]
         return validNodes.includes(node)
@@ -202,10 +205,101 @@ class LineTracer {
         var ndir = nodeFound ? d : -1
         return {ndir, nx, ny}
     }
+
+    static findContrastPath(
+        sourceImage, colorLayer, nodeLayer, x, y,
+        contrastFactor = 10, maxLengthFactor = this.contrastPathLengthFactor
+    ) {
+        var path = []
+        var maxLength = parseInt( (colorLayer.length+colorLayer[0].length)/100.0 * maxLengthFactor )
+        colorLayer[y][x] = this.contrastPathIdentifier
+
+        var pathfinished = false, found = false
+        var cnt = 0
+        while (!pathfinished && cnt < maxLength) {
+            // get all the neighbors possitions that has not been traced before
+            var neighbors = this.createNeighborsPossitions(colorLayer, x, y)
+
+            // find direction by comparing all neighbors contrast
+            var diff = 0, nextPossition = {}
+            for (let n of neighbors) {
+                // compare each neighbors with the next pixels
+                var nextPixels = this.createNeighborsPossitions(colorLayer, n.x, n.y)
+                var difference = this.calculateDifference(sourceImage, n, nextPixels)
+
+                if (difference > diff) {
+                    diff = difference
+                    nextPossition = n
+                }
+            }
+
+            if (neighbors.length != 0 && diff > contrastFactor)
+                path.push({ x: nextPossition.x, y: nextPossition.y, t: 15 })
+            else pathfinished = true
+
+            // when connect with node path
+            if( nextPossition.x != undefined &&
+                this.isValidNode(nodeLayer[nextPossition.y][nextPossition.x]) ) {
+                found = true
+                pathfinished = true
+            }
+            cnt++
+        }
+
+        return found ? path : []
+        
+    }
+
+    static calculateDifference(sourceImage, pixel, nextPixels) {
+        var diff = 0
+        var index = (pixel.y * sourceImage.width + pixel.x) * 4 // 4 values (RGBA)
+
+        var pr = sourceImage.data[index]
+        var pg = sourceImage.data[index+1]
+        var pb = sourceImage.data[index+2]
+
+        var nr = 0, ng = 0, nb = 0
+        for (let n of nextPixels) {
+            index = (n.y * sourceImage.width + n.x) * 4
+            nr = sourceImage.data[index]
+            ng = sourceImage.data[index+1]
+            nb = sourceImage.data[index+2]
+
+            diff += Math.abs(pr-nr) + Math.abs(pg-ng) + Math.abs(pb-nb)
+        }
+
+        // average difference
+        diff /= parseFloat(nextPixels.length)
+        return diff
+    }
+
+    static createNeighborsPossitions(colorLayer, x, y) {
+        var possitions = []
+        var px = x - 1, py = y - 1
+        for (let i = 0; i < 9; i++) {
+            if ( this.checkBounds(colorLayer, px, py) ) {
+                if (colorLayer[py][px] != this.contrastPathIdentifier)
+                    possitions.push({x:px, y:py})
+            }
+            px++
+            if (px > x+1) {
+                px = x - 1
+                py++
+            }
+        }
+        return possitions
+    }
+
+    static checkBounds(layer, x, y) {
+        return x < layer[0].length && x >= 0 && y < layer.length && y >= 0
+    }
+
 }
 
 LineTracer.colorIdentifier = 1
+LineTracer.contrastPathIdentifier = 2
 LineTracer.minimunPathLength = 8
+LineTracer.contrastPathLengthFactor = 12 // relative %
 LineTracer.pathNode_lookup = [
     [[-1,-1], [-1,-1], [-1,-1], [-1,-1]], // node type 0 is invalid
     [[-1,-1], [-1,-1], [ 0, 1], [ 0, 0]], // 1

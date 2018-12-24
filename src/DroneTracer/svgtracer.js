@@ -161,6 +161,7 @@ class LineTracer {
             if (ndir !==  -1) {
                 path.push({ x: nx, y: ny, t: nodeLayer[ny][nx] })
                 px = nx, py = ny, dir = ndir
+                colorLayer[py][px] = this.contrastPathIdentifier
             } else {
                 // not valid node found
                 var contrastPath = this.findContrastPath(sourceImage, colorLayer, nodeLayer, nx, ny)
@@ -233,8 +234,11 @@ class LineTracer {
                 }
             }
 
-            if (neighbors.length != 0 && diff > contrastFactor)
+            if (neighbors.length != 0 && diff > contrastFactor) {
                 path.push({ x: nextPossition.x, y: nextPossition.y, t: 15 })
+                colorLayer[nextPossition.y][nextPossition.x] = this.contrastPathIdentifier
+                x = nextPossition.x, y = nextPossition.y
+            }
             else pathfinished = true
 
             // when connect with node path

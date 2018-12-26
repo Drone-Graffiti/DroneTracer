@@ -19,6 +19,7 @@ describe('svg Tracing', async () => {
 		it('Should pull out color layer', () => {
             var imgm = new ImageManager()
             imgm.source = smallImageData
+            imgm.traceSource = smallImageData
 
             var ltracer = new LineTracer(imgm)
             var colorLayer = ltracer.extractColorLayer()
@@ -34,6 +35,7 @@ describe('svg Tracing', async () => {
 		it('Should find analysis edges as nodes', () => {
             var imgm = new ImageManager()
             imgm.source = smallImageData
+            imgm.traceSource = smallImageData
 
             var ltracer = new LineTracer(imgm)
             ltracer.extractColorLayer()
@@ -52,6 +54,7 @@ describe('svg Tracing', async () => {
 		it('Should find path', async () => {
             var imgm = new ImageManager()
             imgm.source = smallImageData
+            imgm.traceSource = smallImageData
 
             var ltracer = new LineTracer(imgm)
             ltracer.extractColorLayer()
@@ -76,6 +79,7 @@ describe('svg Tracing', async () => {
 		it('Should find 2 directions path', async () => {
             var imgm = new ImageManager()
             imgm.source = mediumImageData
+            imgm.traceSource = mediumImageData
 
             var ltracer = new LineTracer(imgm)
             ltracer.extractColorLayer()
@@ -101,6 +105,7 @@ describe('svg Tracing', async () => {
 		it('Should find complex path', async () => {
             var imgm = new ImageManager()
             imgm.source = complexImageData
+            imgm.traceSource = complexImageData
 
             var ltracer = new LineTracer(imgm)
             ltracer.extractColorLayer()
@@ -157,7 +162,8 @@ describe('svg Tracing', async () => {
             var photoImageData = await ImageManager.base64ToImageData(photoImageFile)
 
             var imgm = new ImageManager()
-            imgm.source = lineImageData
+            imgm.source = photoImageData
+            imgm.traceSource = lineImageData
 
             var ltracer = new LineTracer(imgm)
             ltracer.extractColorLayer()

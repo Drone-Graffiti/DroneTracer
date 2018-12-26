@@ -59,7 +59,6 @@ export default class LineTracer {
             [[ 1, 0], [-1,-1], [-1, 0], [ 1, 0]], // 14
             [[-1,-1], [-1,-1], [-1,-1], [-1,-1]]  // 15
         ]
-        this.imgm.traceSource =  this.imgm.source
     }
 
     // main call for automatize transformation process
@@ -76,7 +75,6 @@ export default class LineTracer {
         // loop through all pixels
         for(let y = 0; y < this.imgm.traceSource.height; y++ ){
             for(let x = 0; x < this.imgm.traceSource.width; x++ ){
-                //var index = (y * this.imgm.traceSource.width + x) * 4 // 4 values (RGBA)
                 var index = this.toIndex(x, y) * 4 // 4 values (RGBA)
 
                 // Linear interpolation | Taxicab geometry
@@ -239,7 +237,7 @@ export default class LineTracer {
             for (let n of neighbors) {
                 // compare each neighbors with the next pixels
                 var nextPixels = this.createNeighborsPossitions(tempTracedMap, n.x, n.y)
-                var difference = this.calculateDifference(n, nextPixels)
+                var difference = this.calculateDifference(n, nextPixels, this.imgm.source)
 
                 if (difference > diff) {
                     diff = difference
@@ -296,22 +294,20 @@ export default class LineTracer {
         mapLayer[y][x] = this.contrastPathIdentifier
     }
 
-    calculateDifference(pixel, nextPixels) {
+    calculateDifference(pixel, nextPixels, source) {
         var diff = 0
-        //var index = (pixel.y * this.imgm.traceSource.width + pixel.x) * 4 // 4 values (RGBA)
         var index = this.toIndex(pixel.x, pixel.y, true) * 4 // 4 values (RGBA)
 
-        var pr = this.imgm.traceSource.data[index]
-        var pg = this.imgm.traceSource.data[index+1]
-        var pb = this.imgm.traceSource.data[index+2]
+        var pr = source.data[index]
+        var pg = source.data[index+1]
+        var pb = source.data[index+2]
 
         var nr = 0, ng = 0, nb = 0
         for (let n of nextPixels) {
-            //index = (n.y * this.imgm.traceSource.width + n.x) * 4
             var index = this.toIndex(n.x, n.y, true) * 4
-            nr = this.imgm.traceSource.data[index]
-            ng = this.imgm.traceSource.data[index+1]
-            nb = this.imgm.traceSource.data[index+2]
+            nr = source.data[index]
+            ng = source.data[index+1]
+            nb = source.data[index+2]
 
             diff += Math.abs(pr-nr) + Math.abs(pg-ng) + Math.abs(pb-nb)
         }

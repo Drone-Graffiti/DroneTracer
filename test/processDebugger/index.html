@@ -1,11 +1,44 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Mocha Tests</title>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+
+    <title>DroneTracer</title>
+    <style>
+        html, body {
+            border: 0;
+            padding: 0;
+            margin: 0;
+        }
+        .drop_zone {
+            width: 50%;
+            padding: 60px 20px;
+            border: solid 1px #aaaaaa;
+            color: #101010;
+            float: left;
+            text-align: center;
+            font-size: 18px;
+            box-sizing: border-box;
+        }
+        #buttonTransform {
+            display: inherit;
+            padding: 10px 30px;
+        }
+    </style>
   </head>
   <body>
+    <div class="drop_zone" id="drop_zone_photo">
+        <p><b>📂</b> Drag a Source File ... </p>
+    </div>
+    <div class="drop_zone" id="drop_zone_canny">
+        <p><b>📂</b> Drag a Canny File ...</p>
+    </div>
+    <button id="buttonTransform">Transform</button>
     <script src="p5.min.js"></script>
     <script src="p5.dom.min.js"></script>
-    <script src="main.js"></script>
+    <script src="debugger.js"></script>
+    <script type="module" src="main.js"></script>
   </body>
 </html>

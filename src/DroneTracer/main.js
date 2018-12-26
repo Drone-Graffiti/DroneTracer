@@ -2,9 +2,8 @@ import * as constants from './constants.js'
 import DronePaint from './dronepaint.js'
 import { readImage, isAnImageFile } from './filereader.js'
 import * as helper from './helper.js'
-//import { base64ToImageData, trace, LineTracer } from './svgtracer.js'
-import { base64ToImageData, trace } from './svgtracer.js'
-import ImageManager from './imagemanager.js'
+import LineTracer from './svgtracer.js'
+import ImageManager  from './imagemanager.js'
 
 
 class DroneTracer {
@@ -37,7 +36,6 @@ class DroneTracer {
             }
 
             // TODO: calculate size/resolution of source
-            // TODO: implement transformation logic
 
             // Initialize ImageManager and source image file
             var imageManager = new ImageManager()

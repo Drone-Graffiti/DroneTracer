@@ -4,6 +4,7 @@ export default class ImageManager {
     constructor() {
         // Properties defaults
         this.sourceImageData = undefined
+        this.traceSource = undefined
         this.cannyImageData = undefined
         this.colorLayer = []
         this.nodeLayer = []

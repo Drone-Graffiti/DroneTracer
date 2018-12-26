@@ -14,7 +14,7 @@ export default class LineTracer {
         this.colorIdentifier = 1
         this.contrastPathIdentifier = 2
         this.minimunPathLength = 8
-        this.contrastPathLengthFactor = 12 // relative %
+        this.contrastPathLengthFactor = 15 // relative %
 
         this.pathNode_lookup = [
             [[-1,-1], [-1,-1], [-1,-1], [-1,-1]], // node type 0 is invalid
@@ -59,6 +59,7 @@ export default class LineTracer {
             [[ 1, 0], [-1,-1], [-1, 0], [ 1, 0]], // 14
             [[-1,-1], [-1,-1], [-1,-1], [-1,-1]]  // 15
         ]
+        this.imgm.traceSource =  this.imgm.source
     }
 
     // main call for automatize transformation process
@@ -73,16 +74,17 @@ export default class LineTracer {
         this.imgm.initColorLayer()
 
         // loop through all pixels
-        for(let y = 0; y < this.imgm.source.height; y++ ){
-            for(let x = 0; x < this.imgm.source.width; x++ ){
-                var index = (y * this.imgm.source.width + x) * 4 // 4 values (RGBA)
+        for(let y = 0; y < this.imgm.traceSource.height; y++ ){
+            for(let x = 0; x < this.imgm.traceSource.width; x++ ){
+                //var index = (y * this.imgm.traceSource.width + x) * 4 // 4 values (RGBA)
+                var index = this.toIndex(x, y) * 4 // 4 values (RGBA)
 
                 // Linear interpolation | Taxicab geometry
                 var difference =
-                    Math.abs(colorSearch.r-this.imgm.source.data[index]) +
-                    Math.abs(colorSearch.g-this.imgm.source.data[index+1]) +
-                    Math.abs(colorSearch.b-this.imgm.source.data[index+2]) +
-                    Math.abs(colorSearch.a-this.imgm.source.data[index+3])
+                    Math.abs(colorSearch.r-this.imgm.traceSource.data[index]) +
+                    Math.abs(colorSearch.g-this.imgm.traceSource.data[index+1]) +
+                    Math.abs(colorSearch.b-this.imgm.traceSource.data[index+2]) +
+                    Math.abs(colorSearch.a-this.imgm.traceSource.data[index+3])
 
                 // compare difference betweeen seach color and pixel index color
                 if(difference < range) this.imgm.colorLayer[y+1][x+1] = this.colorIdentifier
@@ -166,13 +168,19 @@ export default class LineTracer {
             if (ndir !==  -1) {
                 path.push({ x: nx, y: ny, t: this.imgm.nodeLayer[ny][nx] })
                 px = nx, py = ny, dir = ndir
-                this.imgm.tracedMap[py][px] = this.contrastPathIdentifier
+                this.registerTrace( this.imgm.tracedMap, px, py )
             } else {
                 // not valid node found
+
                 var contrastPath = this.findContrastPath(nx, ny)
+
                 // finish the line if you can not find another centerline within the maximum length
                 if (contrastPath.length === 0) pathfinished = true
-                else path = path.concat(contrastPath)
+                else {
+                    px = contrastPath[contrastPath.length-1].x
+                    py = contrastPath[contrastPath.length-1].y
+                    path = path.concat(contrastPath)
+                }
             }
         }
         return path
@@ -188,11 +196,12 @@ export default class LineTracer {
         var nodeFound = false
         for(let step = 0; step < 3 && !nodeFound; ++step) {
             var node = this.imgm.nodeLayer[ny][nx]
-            if (node >= 0) {
+            if (node >= 0 && d >= 0) {
                 var lookupDir = this.pathNode_lookup[ node ][ d ]
                 var lookupPos = this.dirNode_lookup[ node ][ d ]
 
                 // replace node
+                if(lookupDir === undefined) debugger
                 this.imgm.nodeLayer[ny][nx] = lookupDir[0]
             
                 // find new direction
@@ -213,20 +222,23 @@ export default class LineTracer {
 
     findContrastPath(x, y, contrastFactor = 10, maxLengthFactor = this.contrastPathLengthFactor) {
         var path = []
-        var maxLength = parseInt( (this.imgm.source.width+this.imgm.source.height)/100.0 * maxLengthFactor )
-        this.imgm.colorLayer[y][x] = this.contrastPathIdentifier
+        var maxLength = parseInt( (this.imgm.traceSource.width+this.imgm.traceSource.height)/100.0
+            * maxLengthFactor)
 
-        var pathfinished = false, found = false
+        // clone tracedMap
+        var tempTracedMap = this.imgm.tracedMap.slice(0)
+        this.registerTrace( tempTracedMap, x, y )
+
         var cnt = 0
-        while (!pathfinished && cnt < maxLength) {
+        while (cnt < maxLength) {
             // get all the neighbors possitions that has not been traced before
-            var neighbors = this.createNeighborsPossitions(x, y)
+            var neighbors = this.createNeighborsPossitions(tempTracedMap, x, y)
 
             // find direction by comparing all neighbors contrast
             var diff = 0, nextPossition = {}
             for (let n of neighbors) {
                 // compare each neighbors with the next pixels
-                var nextPixels = this.createNeighborsPossitions(n.x, n.y)
+                var nextPixels = this.createNeighborsPossitions(tempTracedMap, n.x, n.y)
                 var difference = this.calculateDifference(n, nextPixels)
 
                 if (difference > diff) {
@@ -235,40 +247,71 @@ export default class LineTracer {
                 }
             }
 
-            if (neighbors.length != 0 && diff > contrastFactor) {
-                path.push({ x: nextPossition.x, y: nextPossition.y, t: 15 })
-                this.imgm.colorLayer[nextPossition.y][nextPossition.x] = this.contrastPathIdentifier
-                x = nextPossition.x, y = nextPossition.y
+            if (neighbors.length != 0) {
+                if (diff > contrastFactor) {
+                    path.push({ x: nextPossition.x, y: nextPossition.y, t: 15 })
+                    this.registerTrace( tempTracedMap, nextPossition.x, nextPossition.y )
+                    x = nextPossition.x, y = nextPossition.y
+                }
+                else {
+                    // random move
+                    var randomDirection = Math.floor(Math.random()*10) // 0 to 9 possitions
+                    nextPossition = {x: x, y: y}
+                    nextPossition.x -=1, nextPossition.y -=1 // start corner left
+
+                    for(let i = 1; i < randomDirection; i++) {
+                        nextPossition.x++
+                        if (i%3 === 0) {
+                            nextPossition.x -= 3
+                            nextPossition.y++
+                        }
+                    }
+
+                    if ( this.checkBounds(
+                        this.imgm.traceSource.width, this.imgm.traceSource.height,
+                        nextPossition.x, nextPossition.y
+                    ) ) {
+                        path.push({ x: nextPossition.x, y: nextPossition.y, t: 15 })
+                        this.registerTrace( tempTracedMap, nextPossition.x, nextPossition.y )
+                        x = nextPossition.x, y = nextPossition.y
+                    }
+                }
             }
-            else pathfinished = true
 
             // when connect with node path
             if( nextPossition.x != undefined &&
                 this.isValidNode(this.imgm.nodeLayer[nextPossition.y][nextPossition.x]) ) {
-                found = true
-                pathfinished = true
+                break
             }
             cnt++
         }
+        if (path.length < maxLength) {
+            this.imgm.tracedMap = tempTracedMap
+        } else path = []
 
-        return found ? path : []
-        
+        return path
+    }
+
+    registerTrace(mapLayer, x, y) {
+        mapLayer[y][x] = this.contrastPathIdentifier
     }
 
     calculateDifference(pixel, nextPixels) {
         var diff = 0
-        var index = (pixel.y * this.imgm.source.width + pixel.x) * 4 // 4 values (RGBA)
+        //var index = (pixel.y * this.imgm.traceSource.width + pixel.x) * 4 // 4 values (RGBA)
+        var index = this.toIndex(pixel.x, pixel.y, true) * 4 // 4 values (RGBA)
 
-        var pr = this.imgm.source.data[index]
-        var pg = this.imgm.source.data[index+1]
-        var pb = this.imgm.source.data[index+2]
+        var pr = this.imgm.traceSource.data[index]
+        var pg = this.imgm.traceSource.data[index+1]
+        var pb = this.imgm.traceSource.data[index+2]
 
         var nr = 0, ng = 0, nb = 0
         for (let n of nextPixels) {
-            index = (n.y * this.imgm.source.width + n.x) * 4
-            nr = this.imgm.source.data[index]
-            ng = this.imgm.source.data[index+1]
-            nb = this.imgm.source.data[index+2]
+            //index = (n.y * this.imgm.traceSource.width + n.x) * 4
+            var index = this.toIndex(n.x, n.y, true) * 4
+            nr = this.imgm.traceSource.data[index]
+            ng = this.imgm.traceSource.data[index+1]
+            nb = this.imgm.traceSource.data[index+2]
 
             diff += Math.abs(pr-nr) + Math.abs(pg-ng) + Math.abs(pb-nb)
         }
@@ -278,12 +321,12 @@ export default class LineTracer {
         return diff
     }
 
-    createNeighborsPossitions(x, y) {
+    createNeighborsPossitions(tracedMap, x, y) {
         var possitions = []
-        var px = x - 1, py = y - 1
+        var px = x - 1, py = y - 1 // start corner left
         for (let i = 0; i < 9; i++) {
-            if ( this.checkBounds(this.imgm.colorLayer, px, py) ) {
-                if (this.imgm.colorLayer[py][px] != this.contrastPathIdentifier)
+            if ( this.checkBounds(this.imgm.traceSource.width, this.imgm.traceSource.height, px, py) ) {
+                if (tracedMap[py][px] != this.contrastPathIdentifier)
                     possitions.push({x:px, y:py})
             }
             px++
@@ -297,6 +340,15 @@ export default class LineTracer {
 
     checkBounds(layer, x, y) {
         return x < layer[0].length && x >= 0 && y < layer.length && y >= 0
+    }
+
+    checkBounds(width, height, x, y) {
+        return x <= width && x > 0 && y <= height && y > 0
+    }
+
+    toIndex(x, y, indexed = false) {
+        var ix = indexed ? -1 : 0
+        return ((y + ix) * this.imgm.traceSource.width + (x + ix))
     }
 
 }

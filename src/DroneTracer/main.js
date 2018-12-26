@@ -4,6 +4,7 @@ import { readImage, isAnImageFile } from './filereader.js'
 import * as helper from './helper.js'
 //import { base64ToImageData, trace, LineTracer } from './svgtracer.js'
 import { base64ToImageData, trace } from './svgtracer.js'
+import ImageManager from './imagemanager.js'
 
 
 class DroneTracer {
@@ -35,23 +36,20 @@ class DroneTracer {
                 imageFile = await readImage(source)
             }
 
-            // TEMP svg tracer
-            var imageData = await base64ToImageData(imageFile)
-            var svgOutput = trace(imageData)
-
-            /*
-             *var colorLayer = LineTracer.extractColorLayer(imageData)
-             *console.log('color layer', colorLayer)
-             *var nodeLayer = LineTracer.edgeAnalysis(colorLayer)
-             *console.log('node layer', nodeLayer)
-             */
-
-
             // TODO: calculate size/resolution of source
             // TODO: implement transformation logic
 
+            // Initialize ImageManager and source image file
+            var imageManager = new ImageManager()
+            imageManager.source = await ImageManager.base64ToImageData(imageFile)
+
+            // Initialize LineTracer
+            var lineTracer =  new LineTracer(imageManager)
+            //lineTracer.processLines??()
+
+
             // calculate transformations and create a DronePaint object
-            var svg = svgOutput
+            var svg = ''
             var dronePaint = new DronePaint(
                 this.paintingConfig,
                 transformOptions,

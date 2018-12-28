@@ -82,18 +82,22 @@ async function tracerTransform() {
     imageManager.traceSource =  await ImageManager.base64ToImageData(imgTrace)
 
     // display source Image
-    displayImage(imgSource)
+    //displayImage(imgSource)
+    background(255)
 
     // run transformation
     var ltracer = new LineTracer(imageManager)
     ltracer.extractColorLayer()
     ltracer.edgeAnalysis()
     var paths = ltracer.pathNodeScan()
+    var traces = ltracer.tracePaths(paths)
 
     window.setTimeout(() => {
         // display paths
-        for (var path of paths)
-            drawPath(path)
+        //for (var path of paths)
+            //drawPath(path, color(80, 200, 80))
+        for (var trace of traces)
+            drawPath(trace, color(0))
     }, 1000) // wait to be transform
 
 }

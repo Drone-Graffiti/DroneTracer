@@ -14,7 +14,8 @@ export default class LineTracer {
         this.colorIdentifier = 1
         this.contrastPathIdentifier = 2
         this.minimunPathLength = 8
-        this.contrastPathLengthFactor = 15 // relative %
+        this.contrastPathLengthFactor = 6 // relative %
+        this.contrastConcatLengthFactor = 12 // relative %
 
         this.pathNode_lookup = [
             [[-1,-1], [-1,-1], [-1,-1], [-1,-1]], // node type 0 is invalid
@@ -22,9 +23,9 @@ export default class LineTracer {
             [[ 0, 1], [-1,-1], [-1,-1], [ 0, 2]], // 2
             [[ 0, 0], [-1,-1], [ 0, 2], [-1,-1]], // 3
 
-            [[-1,-1], [ 0, 0], [ 0, 3], [-1,-1]], // 4
+            [[ 0, 0], [ 0, 0], [ 0, 3], [-1,-1]], // 4
             [[-1,-1], [ 0, 1], [ 0, 1], [ 0, 3]], // 5
-            [[14, 0], [14, 2], [ 0, 2], [ 0, 3]], // 6
+            [[14, 0], [14, 1], [ 0, 2], [ 0, 3]], // 6
             [[ 0, 3], [ 0, 1], [ 0, 3], [ 0, 3]], // 7 ??? check later
 
             [[ 0, 3], [ 0, 2], [-1,-1], [-1,-1]], // 8
@@ -44,13 +45,13 @@ export default class LineTracer {
             [[ 0,-1], [-1,-1], [-1,-1], [-1, 0]], // 2
             [[ 0,-1], [-1,-1], [ 0,-1], [-1,-1]], // 3
 
-            [[-1,-1], [ 1, 0], [ 0, 1], [-1,-1]], // 4
+            [[ 1, 0], [ 1, 0], [ 0, 1], [-1,-1]], // 4
             [[-1,-1], [ 0,-1], [ 0,-1], [ 0, 1]], // 5
-            [[ 1, 0], [ 0, 1], [ 0, 1], [ 0, 1]], // 6
+            [[ 1, 0], [-1,-1], [-1,-1], [ 0, 1]], // 6
             [[ 0, 1], [ 0,-1], [ 0, 1], [ 0, 1]], // 7
 
             [[ 0, 1], [-1, 0], [-1,-1], [-1,-1]], // 8
-            [[ 0,-1], [ 0, 1], [-1, 0], [-1, 0]], // 9
+            [[ 0,-1], [ 0,-1], [-1, 0], [-1, 0]], // 9
             [[ 1, 0], [-1, 0], [-1,-1], [-1, 0]], // 10
             [[-1,-1], [-1, 0], [-1,-1], [-1,-1]], // 11
 
@@ -65,7 +66,8 @@ export default class LineTracer {
     traceImage() {
         this.extractColorLayer()
         this.edgeAnalysis()
-        this.pathNodeScan()
+        var paths = this.pathNodeScan()
+        var traces = this.tracePaths(paths)
     }
 
     // pull out color into layer | Color quantization
@@ -132,12 +134,12 @@ export default class LineTracer {
             for(var x = 0; x < this.imgm.nodeLayer[0].length; x++) {
 
                 // find starting edge
-                if( this.imgm.nodeLayer[y][x] == 4 ) {
+                if( this.imgm.nodeLayer[y][x] == 4 || this.imgm.nodeLayer[y][x] == 6 ) {
                     var path = []
                     path.push({ x: x, y: y, t: this.imgm.nodeLayer[y][x] })
 
-                    // seach path following nodes and contrast, dir = 1
-                    var right_path = this.findCenterline(x, y, 1)
+                    // seach path following nodes and contrast, dir = 0
+                    var right_path = this.findCenterline(x, y, 0)
 
                     // if can not continue, search from the starting pixel in the
                     // opposite direction and concatenate the two outlines
@@ -157,6 +159,101 @@ export default class LineTracer {
         return paths    
     }
 
+    tracePaths(paths) {
+        var traces = paths.slice(0)
+        var concatContrastDistance = parseInt(
+            (this.imgm.traceSource.width+this.imgm.traceSource.height)/100.0 *
+            (this.contrastConcatLengthFactor * 0.8)
+        )
+        
+        for(let j = 0; j < traces.length; j++) {
+            for(let k = j+1; k < traces.length; k++) {
+                var path = traces[j]
+                var line = traces[k]
+
+                // check direct connection
+                var pStart = path[0]
+                var pEnd = path[path.length-1]
+                var lStart = line[0]
+                var lEnd = line[line.length]
+
+                // find closest path
+                var distances = []
+                distances[0] = this.calculateDistance(pEnd,lStart)
+                distances[1] = this.calculateDistance(pStart,lEnd)
+                distances[2] = this.calculateDistance(pStart,lStart)
+                distances[3] = this.calculateDistance(pEnd,lEnd)
+
+                var smallest = concatContrastDistance
+                for (var i = 0; i < distances.length; i++) {
+                    if (distances[i] < concatContrastDistance)
+                        if (distances[i] < smallest) {
+                            smallest = distances[i]
+                            break
+                        }
+                }
+
+                var contrastPath = []
+                switch(i) {
+                    // pEnd -> lStart
+                    case 0:
+                        contrastPath = this.findContrastPath(
+                            pEnd.x, pEnd.y, 100, this.contrastConcatLengthFactor, lStart
+                        )
+                        break
+
+                    // pStart lEnd
+                    case 1:
+                        path.reverse()
+                        line.reverse()
+                        contrastPath = this.findContrastPath(
+                            pStart.x, pStart.y, 100, this.contrastConcatLengthFactor, lEnd
+                        )
+                        break
+
+                    // pStart lStart
+                    case 2:
+                        path.reverse()
+                        contrastPath = this.findContrastPath(
+                            pStart.x, pStart.y, 100, this.contrastConcatLengthFactor, lStart
+                        )
+                        break
+
+                    // pEnd lEnd
+                    case 3:
+                        line.reverse()
+                        contrastPath = this.findContrastPath(
+                            pEnd.x, pEnd.y, 100, this.contrastConcatLengthFactor, lEnd
+                        )
+                        break
+
+                }
+
+                if (contrastPath.length > 0) {
+                    path = path.concat(contrastPath)
+                    traces[j] = path.concat(line)
+                    traces.splice(k,1)
+                    --k
+                }
+
+            }
+
+        }
+        return traces
+    }
+
+     /*
+      * Private Methods
+      */
+
+    calculateDistance(from, to = {x:0,y:0}) {
+        // return just maximun distance not Pythagoras Euclidean distance
+        var x = abs(from.x - to.x)
+        var y = abs(from.y - to.y)
+
+        return Math.max(x, y)
+    }
+
     findCenterline(px, py, dir) {
         var path = []
         var pathfinished = false
@@ -169,16 +266,18 @@ export default class LineTracer {
                 this.registerTrace( this.imgm.tracedMap, px, py )
             } else {
                 // not valid node found
+                pathfinished = true
 
-                var contrastPath = this.findContrastPath(nx, ny)
-
-                // finish the line if you can not find another centerline within the maximum length
-                if (contrastPath.length === 0) pathfinished = true
-                else {
-                    px = contrastPath[contrastPath.length-1].x
-                    py = contrastPath[contrastPath.length-1].y
-                    path = path.concat(contrastPath)
-                }
+                /*
+                 *var contrastPath = this.findContrastPath(nx, ny, 120, this.contrastPathLengthFactor)
+                 * // finish the line if you can not find another centerline within the maximum length
+                 *if (contrastPath.length === 0) pathfinished = true
+                 *else {
+                 *    px = contrastPath[contrastPath.length-1].x
+                 *    py = contrastPath[contrastPath.length-1].y
+                 *    path = path.concat(contrastPath)
+                 *}
+                 */
             }
         }
         return path
@@ -218,7 +317,9 @@ export default class LineTracer {
         return {ndir, nx, ny}
     }
 
-    findContrastPath(x, y, contrastFactor = 10, maxLengthFactor = this.contrastPathLengthFactor) {
+    findContrastPath(
+        x, y, contrastFactor = 10, maxLengthFactor = this.contrastPathLengthFactor, target = false
+    ) {
         var path = []
         var maxLength = parseInt( (this.imgm.traceSource.width+this.imgm.traceSource.height)/100.0
             * maxLengthFactor)
@@ -234,6 +335,7 @@ export default class LineTracer {
 
             // find direction by comparing all neighbors contrast
             var diff = 0, nextPossition = {}
+            var differences = []
             for (let n of neighbors) {
                 // compare each neighbors with the next pixels
                 var nextPixels = this.createNeighborsPossitions(tempTracedMap, n.x, n.y)
@@ -243,7 +345,29 @@ export default class LineTracer {
                     diff = difference
                     nextPossition = n
                 }
+
+                differences.push({pixel: n, diff: difference})
             }
+
+            // induce target direction
+            if (target) {
+                var relativeTarget = {}
+                relativeTarget.x = Math.min(1, Math.max(-1, target.x - x) )
+                relativeTarget.y = Math.min(1, Math.max(-1, target.y - y) )
+
+                var targetPossition = {x: x, y: y}
+                targetPossition.x += relativeTarget.x, targetPossition.y += relativeTarget.y
+
+                if( !(nextPossition.x===targetPossition.x && nextPossition.y===targetPossition.y)
+                    && diff > 0) {
+                    for(let k of differences) {
+                        if(k.pixel.x === targetPossition.x && k.pixel.y === targetPossition.y) {
+                            if (diff - k.diff < (diff*0.20)) nextPossition = targetPossition
+                        }
+                    }
+                }
+            }
+
 
             if (neighbors.length != 0) {
                 if (diff > contrastFactor) {
@@ -254,16 +378,12 @@ export default class LineTracer {
                 else {
                     // random move
                     var randomDirection = Math.floor(Math.random()*10) // 0 to 9 possitions
+                    if (target && Math.random() > 0.5)
+                        randomDirection = this.possitionToDirection(relativeTarget)
                     nextPossition = {x: x, y: y}
-                    nextPossition.x -=1, nextPossition.y -=1 // start corner left
 
-                    for(let i = 1; i < randomDirection; i++) {
-                        nextPossition.x++
-                        if (i%3 === 0) {
-                            nextPossition.x -= 3
-                            nextPossition.y++
-                        }
-                    }
+                    var pos = this.directionToPossition(randomDirection)
+                    nextPossition.x += pos.x, nextPossition.y += pos.y
 
                     if ( this.checkBounds(
                         this.imgm.traceSource.width, this.imgm.traceSource.height,
@@ -283,11 +403,19 @@ export default class LineTracer {
             }
             cnt++
         }
-        if (path.length < maxLength) {
+        if (path.length < maxLength-1) {
             this.imgm.tracedMap = tempTracedMap
         } else path = []
 
         return path
+    }
+
+    directionToPossition(direction) {
+        return {x: (direction%3)-1, y: Math.floor(direction/3)-1}
+    }
+
+    possitionToDirection(possition) {
+        return (possition.y+1)*3+(possition.x+1) 
     }
 
     registerTrace(mapLayer, x, y) {

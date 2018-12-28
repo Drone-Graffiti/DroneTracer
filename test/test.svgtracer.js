@@ -112,9 +112,9 @@ describe('svg Tracing', async () => {
             ltracer.edgeAnalysis()
             var paths = ltracer.pathNodeScan()
 
-            paths.length.should.be.equals(1)
-            //paths[0].length.should.be.equals(22)
-            //paths[1].length.should.be.equals(8)
+            paths.length.should.be.equals(2)
+            paths[0].length.should.be.equals(22)
+            paths[1].length.should.be.equals(8)
             var expected_path = [
                 {x: 8, y: 6, t: 4},
                 {x: 8, y: 7, t: 5},
@@ -139,7 +139,7 @@ describe('svg Tracing', async () => {
                 {x: 7, y: 4, t: 12},
                 {x: 6, y: 4, t: 4}
             ]
-            //paths[0].should.be.eql(expected_path)
+            paths[0].should.be.eql(expected_path)
 
             expected_path = [
                 {x: 6, y: 12, t: 5},
@@ -151,7 +151,7 @@ describe('svg Tracing', async () => {
                 {x: 10, y: 9, t: 12},
                 {x: 11, y: 9, t: 12}
             ]
-            //paths[1].should.be.eql(expected_path)
+            paths[1].should.be.eql(expected_path)
 		})
 
 		it('Should Contrast Path finder', async () => {

@@ -2,8 +2,9 @@
 //import DronePaint from './dronepaint.js'
 import { readImage, isAnImageFile } from '/src/DroneTracer/filereader.js'
 //import * as helper from './helper.js'
-import LineTracer from '/src/DroneTracer/svgtracer.js'
-import ImageManager  from '/src/DroneTracer/imagemanager.js'
+import LineTracer from '/src/DroneTracer/tracer.js'
+import ImageManager from '/src/DroneTracer/imagemanager.js'
+import { exportSVG } from '/src/DroneTracer/svgutils.js'
 
 // Check for the various File API support.
 if (window.File && window.FileReader && window.FileList && window.Blob) {
@@ -94,10 +95,14 @@ async function tracerTransform() {
 
     window.setTimeout(() => {
         // display paths
-        //for (var path of paths)
+        //for (var path of paths) {
             //drawPath(path, color(80, 200, 80))
-        for (var trace of traces)
-            drawPath(trace, color(0))
+        for (var path of traces) {
+            //drawPath(trace, color(0))
+            drawPath(path)
+        }
+
+        console.log( exportSVG(traces) )
     }, 1000) // wait to be transform
 
 }

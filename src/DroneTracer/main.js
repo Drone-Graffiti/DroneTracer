@@ -2,7 +2,7 @@ import * as constants from './constants.js'
 import DronePaint from './dronepaint.js'
 import { readImage, isAnImageFile } from './filereader.js'
 import * as helper from './helper.js'
-import LineTracer from './svgtracer.js'
+import LineTracer from './tracer.js'
 import ImageManager  from './imagemanager.js'
 
 

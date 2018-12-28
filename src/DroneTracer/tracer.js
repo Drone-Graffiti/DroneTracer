@@ -15,7 +15,7 @@ export default class LineTracer {
         this.contrastPathIdentifier = 2
         this.minimunPathLength = 8
         this.contrastPathLengthFactor = 6 // relative %
-        this.contrastConcatLengthFactor = 12 // relative %
+        this.contrastConcatLengthFactor = 22 // relative %
 
         this.pathNode_lookup = [
             [[-1,-1], [-1,-1], [-1,-1], [-1,-1]], // node type 0 is invalid
@@ -60,6 +60,9 @@ export default class LineTracer {
             [[ 1, 0], [-1,-1], [-1, 0], [ 1, 0]], // 14
             [[-1,-1], [-1,-1], [-1,-1], [-1,-1]]  // 15
         ]
+
+        // TODO: remove this line, just temp
+        this.imgm.differenceSource = this.imgm.source
     }
 
     // main call for automatize transformation process
@@ -167,8 +170,11 @@ export default class LineTracer {
         )
         
         for(let j = 0; j < traces.length; j++) {
+            var path = traces[j]
+            var targetPathId = -1, concatMode = 4
+            var smallest = concatContrastDistance // minimun size
+
             for(let k = j+1; k < traces.length; k++) {
-                var path = traces[j]
                 var line = traces[k]
 
                 // check direct connection
@@ -184,17 +190,25 @@ export default class LineTracer {
                 distances[2] = this.calculateDistance(pStart,lStart)
                 distances[3] = this.calculateDistance(pEnd,lEnd)
 
-                var smallest = concatContrastDistance
                 for (var i = 0; i < distances.length; i++) {
-                    if (distances[i] < concatContrastDistance)
-                        if (distances[i] < smallest) {
-                            smallest = distances[i]
-                            break
-                        }
+                    if (distances[i] < smallest) {
+                        smallest = distances[i]
+                        targetPathId = k
+                        concatMode = i
+                    }
                 }
+            }
+
+            if (targetPathId !== -1) {
+                var line = traces[targetPathId]
+
+                var pStart = path[0]
+                var pEnd = path[path.length-1]
+                var lStart = line[0]
+                var lEnd = line[line.length]
 
                 var contrastPath = []
-                switch(i) {
+                switch(concatMode) {
                     // pEnd -> lStart
                     case 0:
                         contrastPath = this.findContrastPath(
@@ -232,8 +246,7 @@ export default class LineTracer {
                 if (contrastPath.length > 0) {
                     path = path.concat(contrastPath)
                     traces[j] = path.concat(line)
-                    traces.splice(k,1)
-                    --k
+                    traces.splice(targetPathId,1)
                 }
 
             }
@@ -266,18 +279,16 @@ export default class LineTracer {
                 this.registerTrace( this.imgm.tracedMap, px, py )
             } else {
                 // not valid node found
-                pathfinished = true
+                //pathfinished = true
 
-                /*
-                 *var contrastPath = this.findContrastPath(nx, ny, 120, this.contrastPathLengthFactor)
-                 * // finish the line if you can not find another centerline within the maximum length
-                 *if (contrastPath.length === 0) pathfinished = true
-                 *else {
-                 *    px = contrastPath[contrastPath.length-1].x
-                 *    py = contrastPath[contrastPath.length-1].y
-                 *    path = path.concat(contrastPath)
-                 *}
-                 */
+                var contrastPath = this.findContrastPath(nx, ny, 30, this.contrastPathLengthFactor,)
+                 // finish the line if you can not find another centerline within the maximum length
+                if (contrastPath.length === 0) pathfinished = true
+                else {
+                    px = contrastPath[contrastPath.length-1].x
+                    py = contrastPath[contrastPath.length-1].y
+                    path = path.concat(contrastPath)
+                }
             }
         }
         return path
@@ -339,7 +350,7 @@ export default class LineTracer {
             for (let n of neighbors) {
                 // compare each neighbors with the next pixels
                 var nextPixels = this.createNeighborsPossitions(tempTracedMap, n.x, n.y)
-                var difference = this.calculateDifference(n, nextPixels, this.imgm.source)
+                var difference = this.calculateDifference(n, nextPixels, this.imgm.differenceSource)
 
                 if (difference > diff) {
                     diff = difference

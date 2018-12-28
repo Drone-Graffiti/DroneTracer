@@ -2,7 +2,7 @@ var assert = chai.assert
 var expect = chai.expect
 var should = chai.should()
 
-import LineTracer from '/src/DroneTracer/svgtracer.js'
+import LineTracer from '/src/DroneTracer/tracer.js'
 import ImageManager from '/src/DroneTracer/imagemanager.js'
 
 describe('svg Tracing', async () => {

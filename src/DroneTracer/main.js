@@ -4,6 +4,7 @@ import { readImage, isAnImageFile } from './filereader.js'
 import * as helper from './helper.js'
 import LineTracer from './tracer.js'
 import ImageManager  from './imagemanager.js'
+import { exportSVG } from './svgutils.js'
 
 
 class DroneTracer {
@@ -40,14 +41,18 @@ class DroneTracer {
             // Initialize ImageManager and source image file
             var imageManager = new ImageManager()
             imageManager.source = await ImageManager.base64ToImageData(imageFile)
+            imageManager.traceSource = source // would be canny
+            imageManager.differenceSource = source // would be nmsuppression
 
             // Initialize LineTracer
-            var lineTracer =  new LineTracer(imageManager)
-            //lineTracer.processLines??()
+            var options = { centerline: false }
+            var lineTracer =  new LineTracer(imageManager, options)
+            var traces = lineTracer.traceImage()
 
+            // convert into SVG file
+            var svg = exportSVG(traces)
 
             // calculate transformations and create a DronePaint object
-            var svg = ''
             var dronePaint = new DronePaint(
                 this.paintingConfig,
                 transformOptions,

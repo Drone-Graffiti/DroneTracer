@@ -81,25 +81,24 @@ async function tracerTransform() {
     // decode base64
     imageManager.source =       await ImageManager.base64ToImageData(imgSource)
     imageManager.traceSource =  await ImageManager.base64ToImageData(imgTrace)
+    imageManager.differenceSource = imageManager.source
 
     // display source Image
     //displayImage(imgSource)
     background(255)
 
     // run transformation
-    var ltracer = new LineTracer(imageManager)
-    ltracer.extractColorLayer()
-    ltracer.edgeAnalysis()
-    var paths = ltracer.pathNodeScan()
-    var traces = ltracer.tracePaths(paths)
+    var options = {
+        centerline: false
+    }
+    var ltracer = new LineTracer(imageManager, options)
+    var traces = ltracer.traceImage()
 
     window.setTimeout(() => {
         // display paths
-        //for (var path of paths) {
-            //drawPath(path, color(80, 200, 80))
-        for (var path of traces) {
+        for (var trace of traces) {
             //drawPath(trace, color(0))
-            drawPath(path)
+            drawPath(trace)
         }
 
         console.log( exportSVG(traces) )

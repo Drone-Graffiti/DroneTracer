@@ -36,6 +36,7 @@ describe('svg Tracing', async () => {
             var imgm = new ImageManager()
             imgm.source = smallImageData
             imgm.traceSource = smallImageData
+            imgm.differenceSource = imgm.source
 
             var ltracer = new LineTracer(imgm)
             ltracer.extractColorLayer()
@@ -55,8 +56,9 @@ describe('svg Tracing', async () => {
             var imgm = new ImageManager()
             imgm.source = smallImageData
             imgm.traceSource = smallImageData
+            imgm.differenceSource = imgm.source
 
-            var ltracer = new LineTracer(imgm)
+            var ltracer = new LineTracer(imgm, {minimunPathLength: 4})
             ltracer.extractColorLayer()
             ltracer.edgeAnalysis()
             var paths = ltracer.pathNodeScan()
@@ -80,8 +82,9 @@ describe('svg Tracing', async () => {
             var imgm = new ImageManager()
             imgm.source = mediumImageData
             imgm.traceSource = mediumImageData
+            imgm.differenceSource = imgm.source
 
-            var ltracer = new LineTracer(imgm)
+            var ltracer = new LineTracer(imgm, {minimunPathLength: 4})
             ltracer.extractColorLayer()
             ltracer.edgeAnalysis()
             var paths = ltracer.pathNodeScan()
@@ -106,8 +109,9 @@ describe('svg Tracing', async () => {
             var imgm = new ImageManager()
             imgm.source = complexImageData
             imgm.traceSource = complexImageData
+            imgm.differenceSource = imgm.source
 
-            var ltracer = new LineTracer(imgm)
+            var ltracer = new LineTracer(imgm, {minimunPathLength: 4})
             ltracer.extractColorLayer()
             ltracer.edgeAnalysis()
             var paths = ltracer.pathNodeScan()
@@ -164,6 +168,7 @@ describe('svg Tracing', async () => {
             var imgm = new ImageManager()
             imgm.source = photoImageData
             imgm.traceSource = lineImageData
+            imgm.differenceSource = imgm.source
 
             var ltracer = new LineTracer(imgm)
             ltracer.extractColorLayer()

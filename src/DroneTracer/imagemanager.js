@@ -13,7 +13,7 @@ export default class ImageManager {
 
 
     initColorLayer() {
-        if (this.source === 'undefined') helper.throw(`Source imageData is required`)
+        if (this.source === 'undefined') helper.throw('Source imageData is required')
 
         // Initialize colorLayer with -1
         // add border (1/side = +2)
@@ -26,7 +26,7 @@ export default class ImageManager {
     }
 
     initNodeLayer() {
-        if (this.colorLayer === 'undefined') helper.throw(`Color Layer has to be initialized`)
+        if (this.colorLayer === 'undefined') helper.throw('Color Layer has to be initialized')
 
         var lh = this.colorLayer.length
         var lw = this.colorLayer[0].length
@@ -41,7 +41,7 @@ export default class ImageManager {
     }
 
     initTracedMap() {
-        if (this.source === 'undefined') helper.throw(`Source imageData is required`)
+        if (this.source === 'undefined') helper.throw('Source imageData is required')
 
         for(let y = 0; y < this.source.height+2; y++) {
             this.tracedMap[y]=[]

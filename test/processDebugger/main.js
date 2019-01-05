@@ -5,7 +5,7 @@ import { readImage, isAnImageFile } from '/src/DroneTracer/filereader.js'
 import LineTracer from '/src/DroneTracer/tracer.js'
 import ImageManager from '/src/DroneTracer/imagemanager.js'
 import { exportSVG } from '/src/DroneTracer/svgutils.js'
-import { grayscale, gaussianBlur } from '/src/DroneTracer/imageprocessing.js'
+import * as ImageProcessing from '/src/DroneTracer/imageprocessing.js'
 
 // Check for the various File API support.
 if (window.File && window.FileReader && window.FileList && window.Blob) {
@@ -75,6 +75,7 @@ var imageManager = new ImageManager()
  */
 async function tracerTransform() {
 
+    console.time('Filtering process')
     // read the images
     var imgSource = await readImage(imageManager.source)
     var imgTrace =  await readImage(imageManager.traceSource)
@@ -84,19 +85,22 @@ async function tracerTransform() {
     imageManager.traceSource =  await ImageManager.base64ToImageData(imgTrace)
     imageManager.differenceSource = imageManager.source
 
-    var grayscaleImg = grayscale(imageManager.source)
-    var gaussianBlurImg = gaussianBlur(grayscaleImg, 4, 8)
+    var grayscaleImg = ImageProcessing.grayscale(imageManager.source)
+    var gaussianBlurImg = ImageProcessing.gaussianBlur(grayscaleImg)
+    var gradientImg = ImageProcessing.gradient(gaussianBlurImg)
+    var nmsuImg = ImageProcessing.nonMaximumSuppression(gradientImg)
+    var hysteresisImg = ImageProcessing.hysteresis(nmsuImg)
 
     // display source Image
     //displayImage(imgSource)
     background(255)
 
-    /*
-     *var renderTarget = gaussianBlurImg
-     *for (var y = 0; y < renderTarget.length; y++)
-     *    for (var x = 0; x < renderTarget[0].length; x++)
-     *        drawPoint(x,y, color(renderTarget[y][x]))
-     */
+    console.timeEnd('Filtering process')
+
+    //var renderTarget = hysteresisImg
+    //for (var y = 0; y < renderTarget.length; y++)
+        //for (var x = 0; x < renderTarget[0].length; x++)
+            //drawPoint(x,y, color(renderTarget[y][x]))
 
     // run transformation
     var options = {

@@ -45,10 +45,11 @@ const getNeighbors = function(imgSource, x, y, size) {
 
 // TODO: convert into ES6 generator?
 const convolve = function(imgSource, neighborSize, callback) {
+    var imgCopy = imgSource.slice(0)
     for (let y = 0; y < imgSource.length; y++) {
         for (let x = 0; x < imgSource[0].length; x++) {
             var current = imgSource[y][x]
-            var neighbors = getNeighbors(imgSource, x, y, neighborSize) 
+            var neighbors = getNeighbors(imgCopy, x, y, neighborSize) 
             callback(x,y, current, neighbors)
             
         }
@@ -92,3 +93,125 @@ export const grayscale = function(imageData) {
     return grayscale
 }
 
+// Gradient (Magnitude) with Sobel
+export const gradient = function(imgSource) {
+    var filterOperator = {
+        y: [
+            [-1, 0, 1],
+            [-2, 0, 2],
+            [-1, 0, 1]
+        ],
+        x: [
+            [-1, -2, -1],
+            [0, 0, 0],
+            [1, 2, 1]
+        ]
+    }
+
+    // create an empty image array
+    var sobelImage = []
+    for (let y of imgSource)
+        sobelImage.push( new Array(imgSource[0].length) )
+
+    convolve(imgSource, 3, (x, y, current, neighbors) => {
+        var sumX = 0, sumY = 0
+
+        for (let i = 0; i < 3; i++) {
+          for (let j = 0; j < 3; j++) {
+              //if (!neighbors[i][j]) continue
+              sumX += neighbors[i][j] * filterOperator['x'][i][j] 
+              sumY += neighbors[i][j] * filterOperator['y'][i][j] 
+          }
+        }
+
+        // magnitude
+        sobelImage[y][x] = Math.round( Math.sqrt(sumX*sumX + sumY*sumY) )
+    })
+
+    return sobelImage
+}
+
+export const nonMaximumSuppression = function(imgSource) {
+    // create an empty image array
+    var nmsuImg = []
+    for (let y of imgSource)
+        nmsuImg.push( new Array(imgSource[0].length) )
+
+    convolve(imgSource, 3, (x, y, current, n) => {
+        if (n[1][1] > n[0][1] && n[1][1] > n[2][1])
+            nmsuImg[y][x] = n[1][1]
+        else
+            nmsuImg[y][x] = 0
+        if (n[1][1] > n[0][2] && n[1][1] > n[2][0])
+            nmsuImg[y][x] = n[1][1]
+        else
+            nmsuImg[y][x] = 0
+        if (n[1][1] > n[1][0] && n[1][1] > n[1][2])
+            nmsuImg[y][x] = n[1][1]
+        else
+            nmsuImg[y][x] = 0
+        if (n[1][1] > n[0][0] && n[1][1] > n[2][2])
+            nmsuImg[y][x] = n[1][1]
+        else
+            nmsuImg[y][x] = 0
+    })
+
+    return nmsuImg
+}
+
+// Threshold in %
+export const hysteresis = function(imgSource, highThreshold = 55, lowThreshold = 5) {
+    //var isStrong = function(edge) {return edge > ht}
+    //var isCandidate = function(edge) {return edge <= ht && edge >= lt}
+    //var isWeak = function(edge) {return edge < lt}
+
+    var ht =  255 * (highThreshold/100)
+    var lt = 255 * (lowThreshold/100)
+
+    // create an empty image array
+    var hysteresisImg = []
+    for (let y of imgSource)
+        hysteresisImg.push( new Array(imgSource[0].length) )
+
+    // first pass | find high threshold edges
+    convolve(imgSource, 3, (x, y, current) => {
+        if (current > ht)
+            hysteresisImg[y][x] = 255
+        else if (current < lt || (current<=ht && current>=lt))
+            hysteresisImg[y][x] = 0
+    
+    })
+
+    // second pass | traver over potential edges and join with high threshold ones
+    var traverseEdge = function(x,y) {
+        if (x === 0 || y === 0 || x === imgSource[0].length-1 || y === imgSource)
+            return
+        if (imgSource[y][x] > ht) {
+            var neighbors = getNeighbors(imgSource, 3)
+            for (let i in neighbors) {
+                for (let j in neighbors[0]) {
+                    if (neighbors[i][j]<=ht && neighbors[i][j]>=lt) {
+                        hysteresisImg[y-1+i][x-1+j] = 255
+                        traverseEdge(x-1+i, y-1+j)
+                    }
+                }
+            }
+        }
+    }
+    convolve(imgSource, 1, (x, y) => { traverseEdge(x, y) })
+
+    // discard others
+    //convolve(imgSource, 1, (x, y, current) => {
+        //if (!current > ht)
+            //hysteresisImg[y][x] = 0
+    //})
+
+    return hysteresisImg
+}
+
+
+// based on https://en.wikipedia.org/wiki/Mathematical_morphology#Dilation
+// radius based on %
+export const dilation = function(imgSource, radius = 10) {
+
+}

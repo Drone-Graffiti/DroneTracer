@@ -75,7 +75,7 @@ export default class LineTracer {
 
     // main call for automatize transformation process
     traceImage() {
-        this.extractColorLayer()
+        this.extractColorLayerFromMap()
         this.edgeAnalysis()
         var paths = this.pathNodeScan()
         var traces
@@ -88,6 +88,7 @@ export default class LineTracer {
     }
 
     // pull out color into layer | Color quantization
+    // not useful since filtered images has absolute values
     extractColorLayer(colorSearch = {r:0,g:0,b:0,a:255}, range = 20) {
         this.imgm.initColorLayer()
 
@@ -105,6 +106,20 @@ export default class LineTracer {
 
                 // compare difference betweeen seach color and pixel index color
                 if(difference < range) this.imgm.colorLayer[y+1][x+1] = this.colorIdentifier
+            }
+        }
+
+        return this.imgm.colorLayer
+    }
+
+    extractColorLayerFromMap(colorSearch = 0) {
+        this.imgm.initColorLayer()
+
+        // loop through all pixels
+        for(let y = 0; y < this.imgm.traceSource.length; y++ ){
+            for(let x = 0; x < this.imgm.traceSource[0].length; x++ ){
+                if (this.imgm.traceSource[y][x] == colorSearch)
+                    this.imgm.colorLayer[y+1][x+1] = this.colorIdentifier
             }
         }
 
@@ -389,7 +404,11 @@ export default class LineTracer {
             for (let n of neighbors) {
                 // compare each neighbors with the next pixels
                 var nextPixels = this.createNeighborsPossitions(tempTracedMap, n.x, n.y)
-                var difference = this.calculateDifference(n, nextPixels, this.imgm.differenceSource)
+                //var difference = this.calculateDifference(n, nextPixels, this.imgm.differenceSource)
+                // use difference map isntead
+                var difference = this.calculateDifferenceFromMap(
+                    n, nextPixels, this.imgm.differenceSource
+                )
 
                 if (difference > diff) {
                     diff = difference
@@ -470,6 +489,20 @@ export default class LineTracer {
 
     registerTrace(mapLayer, x, y) {
         mapLayer[y][x] = this.contrastPathIdentifier
+    }
+
+    calculateDifferenceFromMap(pixel, nextPixels, map) {
+        var diff = 0
+        var px = map[pixel.y][pixel.x]
+        var npx = 0
+        for (let n of nextPixels) {
+            npx = map[n.y][n.x]
+            diff += Math.abs(px-npx)
+        }
+
+        // average difference
+        diff /= parseFloat(nextPixels.length)
+        return diff
     }
 
     calculateDifference(pixel, nextPixels, source) {

@@ -3,9 +3,10 @@ import * as helper from './helper.js'
 export default class ImageManager {
     constructor() {
         // Properties defaults
-        this.sourceImageData = undefined
-        this.traceSource = undefined
+        this.sourceImageData = undefined // original source image
+        this.traceSource = undefined // data to be traced
         this.cannyImageData = undefined
+        this.differenceSource = undefined // map used for finding paths through contrast
         this.colorLayer = []
         this.nodeLayer = []
         this.tracedMap = []

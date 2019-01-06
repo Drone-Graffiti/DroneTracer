@@ -72,7 +72,10 @@ function tracerTransform(imagefile) {
     // Transform image into a flyable drone path
     tracer.transform(
       imagefile, // loaded File API
-      (progress) => { console.log(`${progress}%`) }, // log progress
+      (progress) => {
+          var progressStatus = parseFloat(progress*100).toFixed(1)
+          console.log(`${progressStatus}%`)
+      }, // log progress
       {
         size: [5,8], // graffiti size in meters | default 4mx3m
         color: 2  // default 0. Color id from the paintingConfig color list

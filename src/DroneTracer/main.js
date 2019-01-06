@@ -25,9 +25,16 @@ class DroneTracer {
         if (source === undefined) helper.throw('source image is required. |Image API|')
         var transformOptions = Object.assign({}, constants.defaultTransformOptions, options)
 
-        progress(0)
+        // create a ProgressReport instance
+        var progressReport = new helper.ProgressReport(progress)
+
+        // calculate number of steps
+        var progressSteps = options.centerline ? 11 : 12
+        progressReport.setSteps(progressSteps)
 
         return new Promise( async (resolve, reject) => {
+            progressReport.reportIncreaseStep()
+
             var imageFile
 
             if(typeof(source) === 'string') imageFile = source 
@@ -38,10 +45,13 @@ class DroneTracer {
             }
 
             // TODO: calculate size/resolution of source
+            
 
             // Initialize ImageManager and source image file
             var imageManager = new ImageManager()
             imageManager.source = await ImageManager.base64ToImageData(imageFile)
+
+            progressReport.reportIncreaseStep()
 
             /*
              * Image Filtering
@@ -49,10 +59,19 @@ class DroneTracer {
 
             // canny edge detection
             var grayscaleImg = ImageProcessing.grayscale(imageManager.source)
+            progressReport.reportIncreaseStep()
+
             var gaussianBlurImg = ImageProcessing.gaussianBlur(grayscaleImg)
+            progressReport.reportIncreaseStep()
+
             var gradient = ImageProcessing.gradient(gaussianBlurImg)
+            progressReport.reportIncreaseStep()
+
             var nmsuImg = ImageProcessing.nonMaximumSuppression(gradient.sobelImage, gradient.dirMap)
+            progressReport.reportIncreaseStep()
+
             var hysteresisImg = ImageProcessing.hysteresis(nmsuImg)
+            progressReport.reportIncreaseStep()
 
             // assign maps to ImageManager
             imageManager.cannyImageData = hysteresisImg
@@ -61,7 +80,7 @@ class DroneTracer {
 
             // Initialize LineTracer
             var options = { centerline: false }
-            var lineTracer =  new LineTracer(imageManager, options)
+            var lineTracer =  new LineTracer(imageManager, progressReport, options)
             var traces = lineTracer.traceImage()
 
             // convert into SVG file

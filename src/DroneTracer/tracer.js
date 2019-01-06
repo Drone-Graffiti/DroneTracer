@@ -7,8 +7,9 @@ import * as helper from './helper.js'
 
 export default class LineTracer {
 
-    constructor(imageManager, options = {}) {
+    constructor(imageManager, progressReport = false, options = {}) {
         this.imgm = imageManager
+        this.progressReport = progressReport
 
         this.validNodes = [4,5,6,7,12,13,14]
 
@@ -90,6 +91,7 @@ export default class LineTracer {
     // pull out color into layer | Color quantization
     // not useful since filtered images has absolute values
     extractColorLayer(colorSearch = {r:0,g:0,b:0,a:255}, range = 20) {
+        if (this.progressReport) this.progressReport.increaseStep() // 8
         this.imgm.initColorLayer()
 
         // loop through all pixels
@@ -106,6 +108,9 @@ export default class LineTracer {
 
                 // compare difference betweeen seach color and pixel index color
                 if(difference < range) this.imgm.colorLayer[y+1][x+1] = this.colorIdentifier
+
+                if (this.progressReport)
+                    this.progressReport.report(this.imgm.traceSource.data.length, index)
             }
         }
 
@@ -113,6 +118,7 @@ export default class LineTracer {
     }
 
     extractColorLayerFromMap(colorSearch = 0) {
+        if (this.progressReport) this.progressReport.increaseStep() // 8
         this.imgm.initColorLayer()
 
         // loop through all pixels
@@ -121,6 +127,8 @@ export default class LineTracer {
                 if (this.imgm.traceSource[y][x] == colorSearch)
                     this.imgm.colorLayer[y+1][x+1] = this.colorIdentifier
             }
+            if (this.progressReport)
+                this.progressReport.report(this.imgm.traceSource.length, y)
         }
 
         return this.imgm.colorLayer
@@ -129,6 +137,7 @@ export default class LineTracer {
 
     // analyse the relationship of each pixel related with the neighbors
     edgeAnalysis() {
+        if (this.progressReport) this.progressReport.increaseStep() // 9
         this.imgm.initNodeLayer()
 
         // Looping through all pixels and calculating edge node type
@@ -140,6 +149,8 @@ export default class LineTracer {
                     ( this.imgm.colorLayer[y][x]    === this.colorIdentifier ? 4 : 0 ) +
                     ( this.imgm.colorLayer[y][x-1]  === this.colorIdentifier ? 8 : 0 )
             }
+            if (this.progressReport)
+                this.progressReport.report(this.imgm.colorLayer.length, y)
         }
 
         return this.imgm.nodeLayer
@@ -159,6 +170,7 @@ export default class LineTracer {
     //  0   1   2   3
     //  >   ^   <   v
     pathNodeScan() {
+        if (this.progressReport) this.progressReport.increaseStep() // 10
         var paths = []
         this.imgm.initTracedMap()
 
@@ -186,12 +198,15 @@ export default class LineTracer {
                     if( path.length >= this.config.minimunPathLength ) paths.push(path)
                 }
             }
+            if (this.progressReport)
+                this.progressReport.report(this.imgm.nodeLayer.length, y)
         }
         
         return paths    
     }
 
     tracePaths(paths) {
+        if (this.progressReport) this.progressReport.increaseStep() // ~10 ~11
         var traces = paths.slice(0)
         var concatContrastDistance = parseInt(
             (this.imgm.traceSource.width+this.imgm.traceSource.height)/100.0 *
@@ -280,12 +295,15 @@ export default class LineTracer {
 
             }
 
+            if (this.progressReport)
+                this.progressReport.report(traces.length, j)
         }
 
         return traces
     }
 
     filterTraces(traces, tolerance = this.config.traceFilterTolerance) {
+        if (this.progressReport) this.progressReport.increaseStep() // 12
         // TODO: calculate distance based in cm in wall
         var distance = this.config.drone.minimunDistance
         var smoothTraces = []
@@ -304,6 +322,8 @@ export default class LineTracer {
                 && boundingbox[3] - boundingbox[1] > distance)
                 smoothTraces.push(simplify(trace, tolerance, true))
         }
+
+        if (this.progressReport) this.progressReport.report(1,1)
         return smoothTraces
     }
 

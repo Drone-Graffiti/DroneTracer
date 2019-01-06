@@ -28,7 +28,7 @@ Converts an input image into a svg drone paint
 
 ##### Parameters:
 
-***File***: The input accepts a File API object.
+***File***: The input accepts a **Base64** **string** or a **File API** object.
 *File formats are still not defined but probably would be jpg and png.*
 
 
@@ -111,14 +111,6 @@ $ npm install
 
 
 
-#### Dev watch
-
-```bash
-$ npm run dev
-```
-
-
-
 #### Run test
 
 ```bash
@@ -132,6 +124,17 @@ $ npm test
 ```bash
 $ npm run rlease
 ```
+
+
+
+#### Test Interface Version
+
+```bash
+# Requires release version previously built
+$ npm run interface
+```
+
+
 
 
 

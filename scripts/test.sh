@@ -7,6 +7,8 @@ cd "$(dirname "$0")" && cd ../
 ln -s -f ../node_modules test/
 ln -s -f ../src test/
 
-cd test && python3 -m http.server 8000
+#cd test && python3 -m http.server 8000
 #python3 -m http.server 8000
+# use node instead
+node ./scripts/server.js ./test 8000
 

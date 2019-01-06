@@ -184,14 +184,15 @@ export const hysteresis = function(imgSource, highThreshold = 55, lowThreshold =
 
     // second pass | traver over potential edges and join with high threshold ones
     var traverseEdge = function(x,y) {
-        if (x === 0 || y === 0 || x === imgSource[0].length-1 || y === imgSource)
+        if (x === 0 || y === 0 || x === imgSource[0].length-1 || y === imgSource.length-1)
             return
-        if (imgSource[y][x] > ht) {
-            var neighbors = getNeighbors(imgSource, 3)
-            for (let i in neighbors) {
-                for (let j in neighbors[0]) {
-                    if (neighbors[i][j]<=ht && neighbors[i][j]>=lt) {
-                        hysteresisImg[y-1+i][x-1+j] = 255
+        if (hysteresisImg[y][x] > ht) {
+            var neighbors = getNeighbors(imgSource, x, y, 3)
+            for (let i = 0; i < neighbors.length; i++) {
+                for (let j = 0; j < neighbors[0].length; j++) {
+                    if (neighbors[i][j]<=ht && neighbors[i][j]>=lt &&
+                        hysteresisImg[y-1+j][x-1+i] <= ht) {
+                        hysteresisImg[y-1+j][x-1+i] = 255
                         traverseEdge(x-1+i, y-1+j)
                     }
                 }
@@ -199,12 +200,6 @@ export const hysteresis = function(imgSource, highThreshold = 55, lowThreshold =
         }
     }
     convolve(imgSource, 1, (x, y) => { traverseEdge(x, y) })
-
-    // discard others
-    //convolve(imgSource, 1, (x, y, current) => {
-        //if (!current > ht)
-            //hysteresisImg[y][x] = 0
-    //})
 
     return hysteresisImg
 }

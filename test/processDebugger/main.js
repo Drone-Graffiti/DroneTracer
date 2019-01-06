@@ -1,7 +1,6 @@
 //import * as constants from './constants.js'
-//import DronePaint from './dronepaint.js'
+import DroneTracer from '/src/DroneTracer/main.js'
 import { readImage, isAnImageFile } from '/src/DroneTracer/filereader.js'
-//import * as helper from './helper.js'
 import LineTracer from '/src/DroneTracer/tracer.js'
 import ImageManager from '/src/DroneTracer/imagemanager.js'
 import { exportSVG } from '/src/DroneTracer/svgutils.js'
@@ -74,40 +73,75 @@ var imageManager = new ImageManager()
  *
  */
 async function tracerTransform() {
+    console.time('FilteringProcess')
 
-    console.time('Filtering process')
+    //var paintingConfig = {
+        //wallId: 1,
+        //gpsLocation: [-99.134982,19.413494],
+        //dimensions: [30.4, 22.07],
+        //colors: ['#000000', '#eb340f', '#0f71eb'], // default [#000]
+        //droneResolution: 0.1, // default 0.2
+    //}
+    //var tracer = new DroneTracer(paintingConfig)
+
+    //tracer.transform(
+        //imageManager.source,
+        //(progress) => { console.log(`${progress}%`) }
+    //).then( (dronePaint) => {
+        //console.log( 'result path: ', dronePaint.svgFile )
+    //})
+
+
     // read the images
     var imgSource = await readImage(imageManager.source)
-    var imgTrace =  await readImage(imageManager.traceSource)
+    //var imgTrace = await readImage(imageManager.traceSource)
 
     // decode base64
-    imageManager.source =       await ImageManager.base64ToImageData(imgSource)
-    imageManager.traceSource =  await ImageManager.base64ToImageData(imgTrace)
-    imageManager.differenceSource = imageManager.source
+    imageManager.source = await ImageManager.base64ToImageData(imgSource)
+    //imageManager.traceSource = await ImageManager.base64ToImageData(imgTrace)
+    //imageManager.differenceSource = imageManager.source
 
+    // canny edge detection
     var grayscaleImg = ImageProcessing.grayscale(imageManager.source)
-    var gaussianBlurImg = ImageProcessing.gaussianBlur(grayscaleImg)
-    var gradientImg = ImageProcessing.gradient(gaussianBlurImg)
-    var nmsuImg = ImageProcessing.nonMaximumSuppression(gradientImg)
-    var hysteresisImg = ImageProcessing.hysteresis(nmsuImg)
+    var gaussianBlurImg = ImageProcessing.gaussianBlur(grayscaleImg, 2.4, 7)
+    var gradient = ImageProcessing.gradient(gaussianBlurImg)
+    var nmsuImg = ImageProcessing.nonMaximumSuppression(gradient.sobelImage, gradient.dirMap)
+    var hysteresisImg = ImageProcessing.hysteresis(nmsuImg, 50, 10)
+
+    // assign maps to ImageManager
+    imageManager.cannyImageData = hysteresisImg
+    imageManager.traceSource = ImageProcessing.invert(imageManager.cannyImageData)
+    imageManager.differenceSource = nmsuImg
+    //imageManager.traceSource = grayscaleImg
+    //imageManager.differenceSource = grayscaleImg
 
     // display source Image
     //displayImage(imgSource)
     background(255)
 
-    console.timeEnd('Filtering process')
+    console.timeEnd('FilteringProcess')
 
-    //var renderTarget = hysteresisImg
-    //for (var y = 0; y < renderTarget.length; y++)
-        //for (var x = 0; x < renderTarget[0].length; x++)
-            //drawPoint(x,y, color(renderTarget[y][x]))
+    //var renderTarget = gaussianBlurImg
+    //var renderTarget = gradient.sobelImage
+    var renderTarget = nmsuImg
+    //var renderTarget = gradient.dirMap
+    for (var y = 0; y < renderTarget.length; y++)
+        for (var x = 0; x < renderTarget[0].length; x++)
+            drawPoint(x,y, color(renderTarget[y][x]))
 
     // run transformation
     var options = {
-        centerline: false
+        //centerline: false
+        //centerline: true,
+        minimunPathLength: 12,
+        drone: {minimunDistance: 6}
     }
+
+    console.time('TraceProcess')
     var ltracer = new LineTracer(imageManager, options)
     var traces = ltracer.traceImage()
+
+    console.timeEnd('TraceProcess')
 
     window.setTimeout(() => {
         // display paths
@@ -117,6 +151,6 @@ async function tracerTransform() {
         }
 
         console.log( exportSVG(traces) )
-    }, 1000) // wait to be transform
+    }, 5000) // wait to be transform
 
 }

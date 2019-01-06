@@ -75,21 +75,20 @@ function tracerTransform(imagefile) {
       (progress) => { console.log(`${progress}%`) }, // log progress
       {
         size: [5,8], // graffiti size in meters | default 4mx3m
-        color: 2,  // default 0. Color id from the paintingConfig color list
-        threshold: 0.1
+        color: 2  // default 0. Color id from the paintingConfig color list
       }
     ).then( (dronePaint) => {
       /* The dronePaint object, provides functions to access and modify
        * related information to the svg for the drone.
        * This functions does not affect the transformation process.
        */
-      dronePaint.setPaintingPosition(12.1, 0.85) // default: middle of the wall
-      dronePaint.setPaintingScale(2.5) // post-scale the svg
-      dronePaint.setPaintingData('dataName', 'datAvalue')
+      //dronePaint.setPaintingPosition(12.1, 0.85) // default: middle of the wall
+      //dronePaint.setPaintingScale(2.5) // post-scale the svg
+      //dronePaint.setPaintingData('dataName', 'datAvalue')
 
       console.log( 'result path: ', dronePaint.svgFile )
-      console.log( 'image source: ', dronePaint.sourceImage )
-      console.log( 'painting time: ', dronePaint.estimatedTime )
+      //console.log( 'image source: ', dronePaint.sourceImage )
+      //console.log( 'painting time: ', dronePaint.estimatedTime )
     });
 
 }

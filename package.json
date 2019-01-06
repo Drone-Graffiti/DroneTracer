@@ -9,7 +9,7 @@
     "build": "webpack",
     "release": "npm run build && ./scripts/runrelease.sh",
     "test": "./scripts/test.sh",
-    "interface": "node ./scripts/server.js ./dist 8080"
+    "interface": "node ./scripts/server.js ./dist/example/ 8080"
   },
   "devDependencies": {
     "@babel/core": "^7.2.0",

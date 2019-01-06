@@ -4,6 +4,7 @@ import { readImage, isAnImageFile } from './filereader.js'
 import * as helper from './helper.js'
 import LineTracer from './tracer.js'
 import ImageManager  from './imagemanager.js'
+import * as ImageProcessing from './imageprocessing.js'
 import { exportSVG } from './svgutils.js'
 
 
@@ -41,8 +42,22 @@ class DroneTracer {
             // Initialize ImageManager and source image file
             var imageManager = new ImageManager()
             imageManager.source = await ImageManager.base64ToImageData(imageFile)
-            imageManager.traceSource = source // would be canny
-            imageManager.differenceSource = source // would be nmsuppression
+
+            /*
+             * Image Filtering
+             */
+
+            // canny edge detection
+            var grayscaleImg = ImageProcessing.grayscale(imageManager.source)
+            var gaussianBlurImg = ImageProcessing.gaussianBlur(grayscaleImg)
+            var gradient = ImageProcessing.gradient(gaussianBlurImg)
+            var nmsuImg = ImageProcessing.nonMaximumSuppression(gradient.sobelImage, gradient.dirMap)
+            var hysteresisImg = ImageProcessing.hysteresis(nmsuImg)
+
+            // assign maps to ImageManager
+            imageManager.cannyImageData = hysteresisImg
+            imageManager.traceSource = ImageProcessing.invert(imageManager.cannyImageData)
+            imageManager.differenceSource = nmsuImg 
 
             // Initialize LineTracer
             var options = { centerline: false }
@@ -56,7 +71,7 @@ class DroneTracer {
             var dronePaint = new DronePaint(
                 this.paintingConfig,
                 transformOptions,
-                imageFile,
+                imageManager.source,
                 svg
             )
 

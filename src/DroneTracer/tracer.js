@@ -409,7 +409,8 @@ export default class LineTracer {
                     && diff > 0) {
                     for(let k of differences) {
                         if(k.pixel.x === targetPossition.x && k.pixel.y === targetPossition.y) {
-                            if (diff - k.diff < (diff*this.config.targetInfluence)) nextPossition = targetPossition
+                            if (diff - k.diff < (diff*this.config.targetInfluence))
+                                nextPossition = targetPossition
                         }
                     }
                 }

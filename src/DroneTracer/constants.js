@@ -21,6 +21,7 @@ export const defaultTransformOptions = {
     targetInfluence: 0.5,
     contrastPathLengthFactor: 0.1, // relative %
     contrastConcatLengthFactor: 3, // relative %
+    dilationRadius: 4,
     drone: {
         minimunDistance: 20
     }

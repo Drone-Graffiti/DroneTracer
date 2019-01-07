@@ -268,7 +268,7 @@ export const screen = function(imgSource, imgMask) {
     return screenImg
 }
 
-// based on https://en.wikipedia.org/wiki/Mathematical_morphology#Dilation
+// simplification of on https://en.wikipedia.org/wiki/Mathematical_morphology#Dilation
 const setDilationValue = function(neighbors) {
     for (let x of neighbors) {
         for (let y of x) {
@@ -286,9 +286,81 @@ export const dilation = function(imgSource, radius = 5) {
     for(let y = 0; y < imgSource.length; y++) {
         for(let x = 0; x < imgSource[0].length; x++) {
             var neighbors = getNeighbors(imgSource, x, y, radius*2+1, true)
-            dilationImg[y][x] = setDilationValue(neighbors)
+            dilationImg[y][x] = imgSource[y][x] === 0 ? 0 : setDilationValue(neighbors)
         }
     }
 
     return dilationImg
 }
+
+// implementation base on https://rosettacode.org/wiki/Zhang-Suen_thinning_algorithm#JavaScript
+var nbrs = [[0, -1], [1, -1], [1, 0], [1, 1], [0, 1], [-1, 1], [-1, 0], [-1, -1], [0, -1]]
+var nbrGroups = [[[0, 2, 4], [2, 4, 6]], [[0, 2, 6], [0, 4, 6]]]
+var toWhite = new Array()
+
+export const zsthinning = function(imgSource) {
+    // clone Array
+    var thinningImg = []
+    for (let y of imgSource)
+        thinningImg.push( y.slice(0) )
+
+    var firstStep = false
+    var hasChanged
+    do {
+        hasChanged = false
+        firstStep = !firstStep
+        for (var r = 1; r < thinningImg.length - 1; r++) {
+            for (var c = 1; c < thinningImg[0].length - 1; c++) {
+                if (thinningImg[r][c] !== 0)
+                    continue
+                var nn = numNeighbors(thinningImg, r, c)
+                if (nn < 2 || nn > 6)
+                    continue
+                if (numTransitions(thinningImg, r, c) !== 1)
+                    continue
+                if (!atLeastOneIsWhite(thinningImg, r, c, firstStep ? 0 : 1))
+                    continue
+                toWhite.push({x:c, y:r})
+                hasChanged = true
+            }
+        }
+        for (let i = 0; i < toWhite.length; i++) {
+            var p = toWhite[i]
+            thinningImg[p.y][p.x] = 255
+        }
+        toWhite = new Array()
+    } while ((firstStep || hasChanged))
+
+    return thinningImg
+}
+var numNeighbors = function (imgSource, r, c) {
+    var count = 0
+    for (var i = 0; i < nbrs.length - 1; i++)
+        if (imgSource[r + nbrs[i][1]][c + nbrs[i][0]] === 0)
+            count++
+    return count
+}
+var numTransitions = function (imgSource, r, c) {
+    var count = 0
+    for (var i = 0; i < nbrs.length - 1; i++)
+        if (imgSource[r + nbrs[i][1]][c + nbrs[i][0]] === 255) {
+            if (imgSource[r + nbrs[i + 1][1]][c + nbrs[i + 1][0]] === 0)
+                count++
+        }
+    return count
+}
+var atLeastOneIsWhite = function (imgSource, r, c, step) {
+    var count = 0
+    var group = nbrGroups[step]
+    for (var i = 0; i < 2; i++)
+        for (var j = 0; j < group[i].length; j++) {
+            var nbr = nbrs[group[i][j]]
+            if (imgSource[r + nbr[1]][c + nbr[0]] === 255) {
+                count++
+                break
+            }
+        }
+    return count > 1
+}
+
+

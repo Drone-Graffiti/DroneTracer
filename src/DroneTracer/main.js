@@ -29,7 +29,7 @@ class DroneTracer {
         var progressReport = new helper.ProgressReport(progress)
 
         // calculate number of steps
-        var progressSteps = transformOptions.centerline ? 11 : 12
+        var progressSteps = transformOptions.centerline ? 13 : 12
         progressReport.setSteps(progressSteps)
 
         return new Promise( async (resolve, reject) => {
@@ -57,28 +57,56 @@ class DroneTracer {
              * Image Filtering
              */
 
-            // canny edge detection
             var grayscaleImg = ImageProcessing.grayscale(imageManager.source)
             progressReport.reportIncreaseStep()
 
-            var gaussianBlurImg = ImageProcessing.gaussianBlur(grayscaleImg,
-                transformOptions.blurKernel, transformOptions.blurSigma)
-            progressReport.reportIncreaseStep()
+            // TODO: improve deviation logic (automate)
+            if (transformOptions.centerline) {
+                // Zhang-Suen thinning
+                var thresholdImg = ImageProcessing.thresholdFilter(grayscaleImg, 45)
+                progressReport.reportIncreaseStep()
 
-            var gradient = ImageProcessing.gradient(gaussianBlurImg)
-            progressReport.reportIncreaseStep()
+                var igradient = ImageProcessing.gradient(thresholdImg)
+                progressReport.reportIncreaseStep()
 
-            var nmsuImg = ImageProcessing.nonMaximumSuppression(gradient.sobelImage, gradient.dirMap)
-            progressReport.reportIncreaseStep()
+                var invertSobel = ImageProcessing.invert(igradient.sobelImage)
+                progressReport.reportIncreaseStep()
 
-            var hysteresisImg = ImageProcessing.hysteresis(nmsuImg,
-                transformOptions.hysteresisHighThreshold, transformOptions.hysteresisLowThreshold)
-            progressReport.reportIncreaseStep()
+                var dilationImg = ImageProcessing.dilation(invertSobel, transformOptions.dilationRadius)
+                progressReport.reportIncreaseStep()
 
-            // assign maps to ImageManager
-            imageManager.cannyImageData = hysteresisImg
-            imageManager.traceSource = ImageProcessing.invert(imageManager.cannyImageData)
-            imageManager.differenceSource = nmsuImg 
+                var screenImg = ImageProcessing.screen(dilationImg, thresholdImg)
+                progressReport.reportIncreaseStep()
+
+                var thinningImg = ImageProcessing.zsthinning(screenImg)
+                progressReport.reportIncreaseStep()
+
+
+                // assign maps to ImageManager
+                imageManager.traceSource = thinningImg
+                imageManager.differenceSource = thinningImg
+            }
+            else {
+                // canny edge detection
+                var gaussianBlurImg = ImageProcessing.gaussianBlur(grayscaleImg,
+                    transformOptions.blurKernel, transformOptions.blurSigma)
+                progressReport.reportIncreaseStep()
+
+                var gradient = ImageProcessing.gradient(gaussianBlurImg)
+                progressReport.reportIncreaseStep()
+
+                var nmsuImg = ImageProcessing.nonMaximumSuppression(gradient.sobelImage, gradient.dirMap)
+                progressReport.reportIncreaseStep()
+
+                var hysteresisImg = ImageProcessing.hysteresis(nmsuImg,
+                    transformOptions.hysteresisHighThreshold, transformOptions.hysteresisLowThreshold)
+                progressReport.reportIncreaseStep()
+
+                // assign maps to ImageManager
+                imageManager.cannyImageData = hysteresisImg
+                imageManager.traceSource = ImageProcessing.invert(imageManager.cannyImageData)
+                imageManager.differenceSource = nmsuImg 
+            }
 
             // Initialize LineTracer
             var lineTracer =  new LineTracer(imageManager, transformOptions, progressReport)

@@ -32,7 +32,7 @@ export const exportSVG = function(traces) {
     var SVGString = ''
     var description = ''
     var {x, y} = getMaxSize(traces)
-    var scale = 35
+    var scale = 80
     var w = x * scale, h = y * scale
     var strokeWidth = 10
 

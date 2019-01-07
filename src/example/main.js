@@ -102,6 +102,7 @@ function tracerTransform(imagefile) {
         contrastConcatLengthFactor: document.getElementById('range_distance').value*1.0,
         traceFilterTolerance: document.getElementById('range_smooth').value/10.0,
         centerline: document.getElementById('checkbox_centerline').checked,
+        dilationRadius: document.getElementById('range_dilation').value*1.0,
         drone: {
             minimunDistance: 10
         }

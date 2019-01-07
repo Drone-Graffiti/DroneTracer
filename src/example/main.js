@@ -100,7 +100,7 @@ function tracerTransform(imagefile) {
         hysteresisLowThreshold: document.getElementById('range_lthreshold').value*1.0,
         contrastConcatLengthFactor: document.getElementById('range_distance').value*1.0,
         traceFilterTolerance: document.getElementById('range_smooth').value/10.0,
-        centerline: false,
+        centerline: document.getElementById('checkbox_centerline').checked,
         drone: {
             minimunDistance: 10
         }

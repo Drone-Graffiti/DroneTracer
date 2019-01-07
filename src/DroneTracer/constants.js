@@ -18,6 +18,7 @@ export const defaultTransformOptions = {
     centerline: false,
     traceFilterTolerance: 1.2,
     minimunPathLength: 10,
+    targetInfluence: 0.5,
     contrastPathLengthFactor: 0.1, // relative %
     contrastConcatLengthFactor: 3, // relative %
     drone: {

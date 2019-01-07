@@ -7,21 +7,66 @@
 
     <title>DroneTracer</title>
     <style>
-        #drop_zone {
-            width: 50%;
-            padding: 60px 20px;
+        .center {
+            width: 80%;
             margin: 0 auto;
+            display: block;
+        }
+
+        #drop_zone {
+            padding: 70px 20px;
             border: solid 1px #aaaaaa;
             color: #101010;
             text-align: center;
             font-size: 18px;
         }
+
+        #preview_zone {
+            padding: 0px;
+            border: solid 1px #aaaaaa;
+            margin: 20px auto;
+        }
+
+        label {
+            margin: 30px auto 0 auto !important;
+        }
+
+        input[type=range] {
+            margin: 20px auto;
+            position: relative;
+        }
+
+        input[type=range]::after {
+            content: attr(value);
+            display: block;
+            position: absolute;
+            top: -10px;
+            right: 0;
+        }
     </style>
     </head>
     <body>
-        <div id="drop_zone">
+        <div id="drop_zone" class="center">
             <p><b>📂</b> Drag a files to this Drop Zone ... </p>
         </div>
+        <div class="controls">
+            <label class="center">Gaussian blur</label>
+            <input id="range_blur" class="center" type="range" min="1" max="11" value="5">
+
+            <label class="center">Hysteresis High Threshold (%)</label>
+            <input id="range_hthreshold" class="center" type="range" min="1" max="100" value="60">
+
+            <label class="center">Hysteresis Low Threshold (%)</label>
+            <input id="range_lthreshold" class="center" type="range" min="1" max="100" value="10">
+
+            <label class="center">Concat Distance (%)</label>
+            <input id="range_distance" class="center" type="range" min="0" max="100" value="2">
+
+            <label class="center">Smooth (Simplify)</label>
+            <input id="range_smooth" class="center" type="range" min="0" max="50" value="12">
+        </div>
+        <div id="preview_zone" class="center"></div>
+        <textarea rows="14" cols="75" id="display_zone" class="center"></textarea>
         <script src="/DroneTracer.min.js"></script>
         <script src="/main.js"></script>
     </body>

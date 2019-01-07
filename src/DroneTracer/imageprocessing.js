@@ -197,40 +197,8 @@ export const nonMaximumSuppression = function(imgSource, dirMap) {
     return nmsuImg
 }
 
-export const nonMaximumSuppressionOld = function(imgSource) {
-    // create an empty image array
-    var nmsuImg = []
-    for (let y of imgSource)
-        nmsuImg.push( new Array(y.length) )
-
-    convolve(imgSource, 3, (x, y, current, n) => {
-        if (n[1][1] > n[0][1] && n[1][1] > n[2][1])
-            nmsuImg[y][x] = n[1][1]
-        else
-            nmsuImg[y][x] = 0
-        if (n[1][1] > n[0][2] && n[1][1] > n[2][0])
-            nmsuImg[y][x] = n[1][1]
-        else
-            nmsuImg[y][x] = 0
-        if (n[1][1] > n[1][0] && n[1][1] > n[1][2])
-            nmsuImg[y][x] = n[1][1]
-        else
-            nmsuImg[y][x] = 0
-        if (n[1][1] > n[0][0] && n[1][1] > n[2][2])
-            nmsuImg[y][x] = n[1][1]
-        else
-            nmsuImg[y][x] = 0
-    })
-
-    return nmsuImg
-}
-
 // Threshold in %
 export const hysteresis = function(imgSource, highThreshold = 55, lowThreshold = 5) {
-    //var isStrong = function(edge) {return edge > ht}
-    //var isCandidate = function(edge) {return edge <= ht && edge >= lt}
-    //var isWeak = function(edge) {return edge < lt}
-
     var ht =  255 * (highThreshold/100)
     var lt = 255 * (lowThreshold/100)
 

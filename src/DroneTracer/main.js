@@ -29,7 +29,7 @@ class DroneTracer {
         var progressReport = new helper.ProgressReport(progress)
 
         // calculate number of steps
-        var progressSteps = options.centerline ? 11 : 12
+        var progressSteps = transformOptions.centerline ? 11 : 12
         progressReport.setSteps(progressSteps)
 
         return new Promise( async (resolve, reject) => {
@@ -61,7 +61,8 @@ class DroneTracer {
             var grayscaleImg = ImageProcessing.grayscale(imageManager.source)
             progressReport.reportIncreaseStep()
 
-            var gaussianBlurImg = ImageProcessing.gaussianBlur(grayscaleImg)
+            var gaussianBlurImg = ImageProcessing.gaussianBlur(grayscaleImg,
+                transformOptions.blurKernel, transformOptions.blurSigma)
             progressReport.reportIncreaseStep()
 
             var gradient = ImageProcessing.gradient(gaussianBlurImg)
@@ -70,7 +71,8 @@ class DroneTracer {
             var nmsuImg = ImageProcessing.nonMaximumSuppression(gradient.sobelImage, gradient.dirMap)
             progressReport.reportIncreaseStep()
 
-            var hysteresisImg = ImageProcessing.hysteresis(nmsuImg)
+            var hysteresisImg = ImageProcessing.hysteresis(nmsuImg,
+                transformOptions.hysteresisHighThreshold, transformOptions.hysteresisLowThreshold)
             progressReport.reportIncreaseStep()
 
             // assign maps to ImageManager
@@ -79,8 +81,7 @@ class DroneTracer {
             imageManager.differenceSource = nmsuImg 
 
             // Initialize LineTracer
-            var options = { centerline: false }
-            var lineTracer =  new LineTracer(imageManager, progressReport, options)
+            var lineTracer =  new LineTracer(imageManager, transformOptions, progressReport)
             var traces = lineTracer.traceImage()
 
             // convert into SVG file
@@ -90,7 +91,7 @@ class DroneTracer {
             var dronePaint = new DronePaint(
                 this.paintingConfig,
                 transformOptions,
-                imageManager.source,
+                source,
                 svg
             )
 

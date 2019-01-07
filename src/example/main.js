@@ -43,10 +43,26 @@ function handleDragOver(e) {
 
 
 // Setup the dnd listeners.
-var dropZone = document.getElementById('drop_zone');
-dropZone.addEventListener('dragover', handleDragOver, false);
-dropZone.addEventListener('drop', handleFileSelect, false);
+var dropZone = document.getElementById('drop_zone')
+dropZone.addEventListener('dragover', handleDragOver, false)
+dropZone.addEventListener('drop', handleFileSelect, false)
 
+//
+// UI
+//
+var preview_zone = document.getElementById('preview_zone')
+var display_zone = document.getElementById('display_zone')
+
+document.querySelectorAll('input[type=range]').forEach((el)=>{
+    el.oninput = function(e) {
+        e.srcElement.setAttribute('value', this.value)
+    }
+})
+
+const map = function(n, start1, stop1, start2, stop2) {
+    var newval = (n - start1) / (stop1 - start1) * (stop2 - start2) + start2;
+    return newval;
+}
 
 /*
  *     ____  ____   __   __ _  ____  ____  ____   __    ___  ____  ____
@@ -69,29 +85,30 @@ var tracer = new DroneTracer(paintingConfig)
 
 function tracerTransform(imagefile) {
 
+    console.time('TransformProcess')
     // Transform image into a flyable drone path
     tracer.transform(
       imagefile, // loaded File API
       (progress) => {
-          var progressStatus = parseFloat(progress*100).toFixed(1)
-          console.log(`${progressStatus}%`)
+          var progressStatus = parseFloat(progress*100)
+          console.log(`progress ${progressStatus}%`)
       }, // log progress
       {
-        size: [5,8], // graffiti size in meters | default 4mx3m
-        color: 2  // default 0. Color id from the paintingConfig color list
+        blurKernel: document.getElementById('range_blur').value*1.0,
+        blurSigma: map(document.getElementById('range_blur').value, 3, 11, 1.4, 3.8),
+        hysteresisHighThreshold: document.getElementById('range_hthreshold').value*1.0,
+        hysteresisLowThreshold: document.getElementById('range_lthreshold').value*1.0,
+        contrastConcatLengthFactor: document.getElementById('range_distance').value*1.0,
+        traceFilterTolerance: document.getElementById('range_smooth').value/10.0,
+        centerline: false,
+        drone: {
+            minimunDistance: 10
+        }
       }
     ).then( (dronePaint) => {
-      /* The dronePaint object, provides functions to access and modify
-       * related information to the svg for the drone.
-       * This functions does not affect the transformation process.
-       */
-      //dronePaint.setPaintingPosition(12.1, 0.85) // default: middle of the wall
-      //dronePaint.setPaintingScale(2.5) // post-scale the svg
-      //dronePaint.setPaintingData('dataName', 'datAvalue')
-
-      console.log( 'result path: ', dronePaint.svgFile )
-      //console.log( 'image source: ', dronePaint.sourceImage )
-      //console.log( 'painting time: ', dronePaint.estimatedTime )
+        console.timeEnd('TransformProcess')
+        preview_zone.innerHTML = dronePaint.svgFile
+        display_zone.innerText = dronePaint.svgFile
     });
 
 }

@@ -75,23 +75,33 @@ var imageManager = new ImageManager()
 async function tracerTransform() {
     console.time('FilteringProcess')
 
-    //var paintingConfig = {
-        //wallId: 1,
-        //gpsLocation: [-99.134982,19.413494],
-        //dimensions: [30.4, 22.07],
-        //colors: ['#000000', '#eb340f', '#0f71eb'], // default [#000]
-        //droneResolution: 0.1, // default 0.2
-    //}
-    //var tracer = new DroneTracer(paintingConfig)
+    var paintingConfig = {
+        wallId: 1,
+        gpsLocation: [-99.134982,19.413494],
+        dimensions: [30.4, 22.07],
+        colors: ['#000000', '#eb340f', '#0f71eb'], // default [#000]
+        droneResolution: 0.1, // default 0.2
+    }
+    var tracer = new DroneTracer(paintingConfig)
 
-    //tracer.transform(
-        //imageManager.source,
-        //(progress) => { console.log(`${progress}%`) }
-    //).then( (dronePaint) => {
-        //console.log( 'result path: ', dronePaint.svgFile )
-    //})
+    tracer.transform(
+        imageManager.source,
+        (progress) => { console.log(`${progress}%`) },
+        {
+            blurKernel: 3,
+            blurSigma: 1.4,
+            centerline: false,
+            contrastConcatLengthFactor: 2,
+            drone: {minimunDistance: 10},
+            hysteresisHighThreshold: 50,
+            hysteresisLowThreshold: 5,
+            traceFilterTolerance: 1
+        }
+    ).then( (dronePaint) => {
+        console.log( 'result path: ', dronePaint.svgFile )
+    })
 
-
+/*
     // read the images
     var imgSource = await readImage(imageManager.source)
     //var imgTrace = await readImage(imageManager.traceSource)
@@ -133,7 +143,8 @@ async function tracerTransform() {
     var options = {
         //centerline: false
         //centerline: true,
-        minimunPathLength: 12,
+        //minimunPathLength: 12,
+        contrastConcatLengthFactor: 22,
         drone: {minimunDistance: 6}
     }
 
@@ -151,6 +162,7 @@ async function tracerTransform() {
         }
 
         console.log( exportSVG(traces) )
-    }, 5000) // wait to be transform
+    }, 100) // wait to p5 to refresh
+    */
 
 }

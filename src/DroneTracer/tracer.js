@@ -7,7 +7,7 @@ import * as helper from './helper.js'
 
 export default class LineTracer {
 
-    constructor(imageManager, progressReport = false, options = {}) {
+    constructor(imageManager, options = {}, progressReport = false) {
         this.imgm = imageManager
         this.progressReport = progressReport
 
@@ -60,23 +60,12 @@ export default class LineTracer {
             [[-1,-1], [-1,-1], [-1,-1], [-1,-1]]  // 15
         ]
 
-        var defaultOptions = {
-            centerline: false,
-            traceFilterTolerance: 1.2,
-            minimunPathLength: 10,
-            contrastPathLengthFactor: 6, // relative %
-            contrastConcatLengthFactor: 22, // relative %
-            drone: {
-                minimunDistance: 20
-            }
-        }
-
-        this.config = Object.assign(defaultOptions, options)
+        this.config = options
     }
 
     // main call for automatize transformation process
     traceImage() {
-        this.extractColorLayerFromMap()
+        this.extractColorLayer()
         this.edgeAnalysis()
         var paths = this.pathNodeScan()
         var traces
@@ -89,36 +78,8 @@ export default class LineTracer {
     }
 
     // pull out color into layer | Color quantization
-    // not useful since filtered images has absolute values
-    extractColorLayer(colorSearch = {r:0,g:0,b:0,a:255}, range = 20) {
-        if (this.progressReport) this.progressReport.increaseStep() // 8
-        this.imgm.initColorLayer()
-
-        // loop through all pixels
-        for(let y = 0; y < this.imgm.traceSource.height; y++ ){
-            for(let x = 0; x < this.imgm.traceSource.width; x++ ){
-                var index = this.toIndex(x, y) * 4 // 4 values (RGBA)
-
-                // Linear interpolation | Taxicab geometry
-                var difference =
-                    Math.abs(colorSearch.r-this.imgm.traceSource.data[index]) +
-                    Math.abs(colorSearch.g-this.imgm.traceSource.data[index+1]) +
-                    Math.abs(colorSearch.b-this.imgm.traceSource.data[index+2]) +
-                    Math.abs(colorSearch.a-this.imgm.traceSource.data[index+3])
-
-                // compare difference betweeen seach color and pixel index color
-                if(difference < range) this.imgm.colorLayer[y+1][x+1] = this.colorIdentifier
-
-                if (this.progressReport)
-                    this.progressReport.report(this.imgm.traceSource.data.length, index)
-            }
-        }
-
-        return this.imgm.colorLayer
-    }
-
-    extractColorLayerFromMap(colorSearch = 0) {
-        if (this.progressReport) this.progressReport.increaseStep() // 8
+    extractColorLayer(colorSearch = 0) {
+        if (this.progressReport) this.progressReport.increaseStep()
         this.imgm.initColorLayer()
 
         // loop through all pixels
@@ -137,7 +98,7 @@ export default class LineTracer {
 
     // analyse the relationship of each pixel related with the neighbors
     edgeAnalysis() {
-        if (this.progressReport) this.progressReport.increaseStep() // 9
+        if (this.progressReport) this.progressReport.increaseStep()
         this.imgm.initNodeLayer()
 
         // Looping through all pixels and calculating edge node type
@@ -170,7 +131,7 @@ export default class LineTracer {
     //  0   1   2   3
     //  >   ^   <   v
     pathNodeScan() {
-        if (this.progressReport) this.progressReport.increaseStep() // 10
+        if (this.progressReport) this.progressReport.increaseStep()
         var paths = []
         this.imgm.initTracedMap()
 
@@ -206,11 +167,11 @@ export default class LineTracer {
     }
 
     tracePaths(paths) {
-        if (this.progressReport) this.progressReport.increaseStep() // ~10 ~11
+        if (this.progressReport) this.progressReport.increaseStep()
         var traces = paths.slice(0)
         var concatContrastDistance = parseInt(
-            (this.imgm.traceSource.width+this.imgm.traceSource.height)/100.0 *
-            (this.config.contrastConcatLengthFactor * 0.8)
+            (this.imgm.traceSource[0].length+this.imgm.traceSource.length)/100.0 *
+            (this.config.contrastConcatLengthFactor)
         )
         
         for(let j = 0; j < traces.length; j++) {
@@ -303,7 +264,7 @@ export default class LineTracer {
     }
 
     filterTraces(traces, tolerance = this.config.traceFilterTolerance) {
-        if (this.progressReport) this.progressReport.increaseStep() // 12
+        if (this.progressReport) this.progressReport.increaseStep()
         // TODO: calculate distance based in cm in wall
         var distance = this.config.drone.minimunDistance
         var smoothTraces = []
@@ -406,7 +367,7 @@ export default class LineTracer {
         target = false
     ) {
         var path = []
-        var maxLength = parseInt( (this.imgm.traceSource.width+this.imgm.traceSource.height)/100.0
+        var maxLength = parseInt( (this.imgm.traceSource[0].length+this.imgm.traceSource.length)/100.0
             * maxLengthFactor)
 
         // clone tracedMap
@@ -424,11 +385,8 @@ export default class LineTracer {
             for (let n of neighbors) {
                 // compare each neighbors with the next pixels
                 var nextPixels = this.createNeighborsPossitions(tempTracedMap, n.x, n.y)
-                //var difference = this.calculateDifference(n, nextPixels, this.imgm.differenceSource)
-                // use difference map isntead
-                var difference = this.calculateDifferenceFromMap(
-                    n, nextPixels, this.imgm.differenceSource
-                )
+                // use difference map instead
+                var difference = this.calculateDifference(n, nextPixels, this.imgm.differenceSource)
 
                 if (difference > diff) {
                     diff = difference
@@ -475,7 +433,7 @@ export default class LineTracer {
                     nextPossition.x += pos.x, nextPossition.y += pos.y
 
                     if ( this.checkBounds(
-                        this.imgm.traceSource.width, this.imgm.traceSource.height,
+                        this.imgm.traceSource[0].length-1, this.imgm.traceSource.length-1,
                         nextPossition.x, nextPossition.y
                     ) ) {
                         path.push({ x: nextPossition.x, y: nextPossition.y, t: 15 })
@@ -485,10 +443,15 @@ export default class LineTracer {
                 }
             }
 
-            // when connect with node path
-            if( nextPossition.x != undefined &&
-                this.isValidNode(this.imgm.nodeLayer[nextPossition.y][nextPossition.x]) ) {
-                break
+            if (this.checkBounds(
+                this.imgm.traceSource[0].length-1, this.imgm.traceSource.length-1, 
+                nextPossition.x, nextPossition.y
+            ) ) {
+                // when connect with node path
+                if( nextPossition.x != undefined &&
+                    this.isValidNode(this.imgm.nodeLayer[nextPossition.y][nextPossition.x]) ) {
+                    break
+                }
             }
             cnt++
         }
@@ -511,7 +474,7 @@ export default class LineTracer {
         mapLayer[y][x] = this.contrastPathIdentifier
     }
 
-    calculateDifferenceFromMap(pixel, nextPixels, map) {
+    calculateDifference(pixel, nextPixels, map) {
         var diff = 0
         var px = map[pixel.y][pixel.x]
         var npx = 0
@@ -525,34 +488,13 @@ export default class LineTracer {
         return diff
     }
 
-    calculateDifference(pixel, nextPixels, source) {
-        var diff = 0
-        var idx = this.toIndex(pixel.x, pixel.y, true) * 4 // 4 values (RGBA)
-
-        var pr = source.data[idx]
-        var pg = source.data[idx+1]
-        var pb = source.data[idx+2]
-
-        var nr = 0, ng = 0, nb = 0
-        for (let n of nextPixels) {
-            var index = this.toIndex(n.x, n.y, true) * 4
-            nr = source.data[index]
-            ng = source.data[index+1]
-            nb = source.data[index+2]
-
-            diff += Math.abs(pr-nr) + Math.abs(pg-ng) + Math.abs(pb-nb)
-        }
-
-        // average difference
-        diff /= parseFloat(nextPixels.length)
-        return diff
-    }
-
     createNeighborsPossitions(tracedMap, x, y) {
         var possitions = []
         var px = x - 1, py = y - 1 // start corner left
         for (let i = 0; i < 9; i++) {
-            if ( this.checkBounds(this.imgm.traceSource.width, this.imgm.traceSource.height, px, py) ) {
+            if ( this.checkBounds(
+                this.imgm.traceSource[0].length-1, this.imgm.traceSource.length-1, px, py)
+            ) {
                 if (tracedMap[py][px] != this.contrastPathIdentifier)
                     possitions.push({x:px, y:py})
             }
@@ -571,7 +513,7 @@ export default class LineTracer {
 
     toIndex(x, y, indexed = false) {
         var ix = indexed ? -1 : 0
-        return ((y + ix) * this.imgm.traceSource.width + (x + ix))
+        return ((y + ix) * this.imgm.traceSource[0].length + (x + ix))
     }
 
 }

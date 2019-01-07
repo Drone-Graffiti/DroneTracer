@@ -11,7 +11,16 @@ export const requiredPaintingConfigParams = ['wallId', 'gpsLocation', 'dimension
 // default transformation options
 export const defaultTransformOptions = {
     size: [4, 3], // default graffiti size 4m x 3m
-    color: 0, // Color id from the paintingConfig color list
-    threshold: 0.1
-    // more TBD
+    blurKernel: 3,
+    blurSigma: 1.4,
+    hysteresisHighThreshold: 50,
+    hysteresisLowThreshold: 5,
+    centerline: false,
+    traceFilterTolerance: 1.2,
+    minimunPathLength: 10,
+    contrastPathLengthFactor: 0.1, // relative %
+    contrastConcatLengthFactor: 3, // relative %
+    drone: {
+        minimunDistance: 20
+    }
 }

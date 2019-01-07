@@ -4,6 +4,7 @@ var should = chai.should()
 
 import LineTracer from '/src/DroneTracer/tracer.js'
 import ImageManager from '/src/DroneTracer/imagemanager.js'
+import * as ImageProcessing from '/src/DroneTracer/imageprocessing.js'
 
 describe('svg Tracing', async () => {
         var smallImageFile = `data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAMAAAADCAYAAABWKLW/AAAACXBIWXMAAFxGAABcRgEUlENBAAAAHUlEQVQIHWNkYGD4D8RgwAQi//+H8BlBbLAwkAAAaCcFAP1akycAAAAASUVORK5CYII=`
@@ -19,7 +20,7 @@ describe('svg Tracing', async () => {
 		it('Should pull out color layer', () => {
             var imgm = new ImageManager()
             imgm.source = smallImageData
-            imgm.traceSource = smallImageData
+            imgm.traceSource = ImageProcessing.grayscale(imgm.source)
 
             var ltracer = new LineTracer(imgm)
             var colorLayer = ltracer.extractColorLayer()
@@ -35,8 +36,8 @@ describe('svg Tracing', async () => {
 		it('Should find analysis edges as nodes', () => {
             var imgm = new ImageManager()
             imgm.source = smallImageData
-            imgm.traceSource = smallImageData
-            imgm.differenceSource = imgm.source
+            imgm.traceSource = ImageProcessing.grayscale(imgm.source)
+            imgm.differenceSource = imgm.traceSource
 
             var ltracer = new LineTracer(imgm)
             ltracer.extractColorLayer()
@@ -55,8 +56,8 @@ describe('svg Tracing', async () => {
 		it('Should find path', async () => {
             var imgm = new ImageManager()
             imgm.source = smallImageData
-            imgm.traceSource = smallImageData
-            imgm.differenceSource = imgm.source
+            imgm.traceSource = ImageProcessing.grayscale(imgm.source)
+            imgm.differenceSource = imgm.traceSource
 
             var ltracer = new LineTracer(imgm, {minimunPathLength: 4})
             ltracer.extractColorLayer()
@@ -81,8 +82,8 @@ describe('svg Tracing', async () => {
 		it('Should find 2 directions path', async () => {
             var imgm = new ImageManager()
             imgm.source = mediumImageData
-            imgm.traceSource = mediumImageData
-            imgm.differenceSource = imgm.source
+            imgm.traceSource = ImageProcessing.grayscale(imgm.source)
+            imgm.differenceSource = imgm.traceSource
 
             var ltracer = new LineTracer(imgm, {minimunPathLength: 4})
             ltracer.extractColorLayer()
@@ -108,8 +109,8 @@ describe('svg Tracing', async () => {
 		it('Should find complex path', async () => {
             var imgm = new ImageManager()
             imgm.source = complexImageData
-            imgm.traceSource = complexImageData
-            imgm.differenceSource = imgm.source
+            imgm.traceSource = ImageProcessing.grayscale(imgm.source)
+            imgm.differenceSource = imgm.traceSource
 
             var ltracer = new LineTracer(imgm, {minimunPathLength: 4})
             ltracer.extractColorLayer()
@@ -167,14 +168,13 @@ describe('svg Tracing', async () => {
 
             var imgm = new ImageManager()
             imgm.source = photoImageData
-            imgm.traceSource = lineImageData
-            imgm.differenceSource = imgm.source
+            imgm.traceSource = ImageProcessing.grayscale(lineImageData)
+            imgm.differenceSource = ImageProcessing.grayscale(imgm.source)
 
             var ltracer = new LineTracer(imgm)
             ltracer.extractColorLayer()
             ltracer.edgeAnalysis()
             var paths = ltracer.pathNodeScan()
-            console.log(paths)
 
 		}).timeout(10000)
 	})

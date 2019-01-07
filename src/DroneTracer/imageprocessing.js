@@ -33,7 +33,7 @@ const getNeighbors = function(imgSource, x, y, size, repeat = false) {
         for (let j = 0; j < size; j++) {
             var trnsX = x-(size-1)/2+i
             var trnsY = y-(size-1)/2+j
-            if (imgSource[trnsY] && imgSource[trnsY][trnsX])
+            if (imgSource[trnsY] !== undefined && imgSource[trnsY][trnsX] !== undefined)
                 neighbors[i][j] = imgSource[trnsY][trnsX]
             else {
                 if (repeat) neighbors[i][j] = imgSource[y][x]
@@ -114,8 +114,9 @@ export const grayscale = function(imageData) {
             let r = imageData.data[index]
             let g = imageData.data[index + 1]
             let b = imageData.data[index + 2]
+            let a = imageData.data[index + 3]
 
-            grayscale[y][x] = (0.3 * r) + (0.59 * g) + (0.11 * b)
+            grayscale[y][x] = a===255 ? (0.3 * r)+(0.59 * g)+(0.11 * b) : 255
         }
     }
 
@@ -170,7 +171,7 @@ export const gradient = function(imgSource) {
 
 // based on cmisenas non-maximum-suppression for canny-edge-detection
 export const nonMaximumSuppression = function(imgSource, dirMap) {
-    // create an empty image array
+    // clone Array
     var nmsuImg = []
     for (let y of imgSource)
         nmsuImg.push( y.slice(0) )
@@ -238,9 +239,56 @@ export const hysteresis = function(imgSource, highThreshold = 55, lowThreshold =
     return hysteresisImg
 }
 
+// threshold value in %
+export const thresholdFilter = function(imgSource, thresholdValue) {
+    var thresholdImg = []
+    var threshold = 255 * (thresholdValue/100)
+    for (let y = 0; y < imgSource.length; y++) {
+        thresholdImg[y] = []
+        for (let x = 0; x < imgSource[0].length; x++)
+            thresholdImg[y][x] = imgSource[y][x] > threshold ? 255 : 0
+    }
+
+    return thresholdImg
+}
+
+export const screen = function(imgSource, imgMask) {
+    var screenImg = []
+
+    for (let y = 0; y < imgSource.length; y++) {
+        screenImg[y] = []
+        for (let x = 0; x < imgSource[0].length; x++) {
+            if (imgSource[y][x] === imgMask[y][x] && imgSource[y][x] === 0)
+                screenImg[y][x] = 0
+            else 
+                screenImg[y][x] = 255
+        }
+    }
+
+    return screenImg
+}
 
 // based on https://en.wikipedia.org/wiki/Mathematical_morphology#Dilation
-// radius based on %
-//export const dilation = function(imgSource, radius = 10) {
+const setDilationValue = function(neighbors) {
+    for (let x of neighbors) {
+        for (let y of x) {
+            if ( y < 255 ) return 0
+        }
+    }
+    return 255
+}
+export const dilation = function(imgSource, radius = 5) {
+    // create an empty image array
+    var dilationImg = []
+    for (let y of imgSource)
+        dilationImg.push( new Array(y.length) )
 
-//}
+    for(let y = 0; y < imgSource.length; y++) {
+        for(let x = 0; x < imgSource[0].length; x++) {
+            var neighbors = getNeighbors(imgSource, x, y, radius*2+1, true)
+            dilationImg[y][x] = setDilationValue(neighbors)
+        }
+    }
+
+    return dilationImg
+}

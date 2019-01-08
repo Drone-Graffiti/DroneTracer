@@ -5,7 +5,6 @@ import * as helper from './helper.js'
 import LineTracer from './tracer.js'
 import ImageManager  from './imagemanager.js'
 import * as ImageProcessing from './imageprocessing.js'
-import { exportSVG } from './svgutils.js'
 
 
 class DroneTracer {
@@ -88,8 +87,9 @@ class DroneTracer {
             }
             else {
                 // canny edge detection
-                var gaussianBlurImg = ImageProcessing.gaussianBlur(grayscaleImg,
-                    transformOptions.blurKernel, transformOptions.blurSigma)
+                //var gaussianBlurImg = ImageProcessing.gaussianBlur(grayscaleImg,
+                var gaussianBlurImg = ImageProcessing.fastBlur(grayscaleImg,
+                    transformOptions.blurKernel)
                 progressReport.reportIncreaseStep()
 
                 var gradient = ImageProcessing.gradient(gaussianBlurImg)
@@ -112,20 +112,23 @@ class DroneTracer {
             var lineTracer =  new LineTracer(imageManager, transformOptions, progressReport)
             var traces = lineTracer.traceImage()
 
-            // convert into SVG file
-            var svg = exportSVG(traces)
 
             // calculate transformations and create a DronePaint object
             var dronePaint = new DronePaint(
                 this.paintingConfig,
                 transformOptions,
                 source,
-                svg
+                traces
             )
 
             resolve(dronePaint)
         })
     }
+
+    get uiParams() {
+        // TODO: implement method that return parameters declaration and specs for UI
+        return 0
+    } 
 }
 
 export default DroneTracer

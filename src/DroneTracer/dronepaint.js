@@ -1,3 +1,5 @@
+import { exportSVG } from './svgutils.js'
+
 const calculateEstimatedTime = function(svg) {
     svg = 0
     return 3 * 60 * 1000 + svg
@@ -5,7 +7,7 @@ const calculateEstimatedTime = function(svg) {
 
 // Drone Paint provides functions to access and modify related information to the svg for the drone
 class DronePaint {
-    constructor({wallId, dimensions}, {size}, source, svg) {
+    constructor({wallId, dimensions}, {size}, source, traces) {
         var middleX = dimensions[0]/2.0 - size[0]/2.0
         var middelY = dimensions[1]/2.0 - size[1]/2.0
         this.setPaintingPosition( middleX, middelY )
@@ -15,7 +17,9 @@ class DronePaint {
 
         // asign
         this.source = source
-        this.svg = svg
+        this.traces = traces
+
+        this.calculateSVG()
     }
 
 
@@ -49,6 +53,11 @@ class DronePaint {
     setPaintingData(name, value) {
         // TODO: add a data property
         return `data:${name}-${value}`
+    }
+
+    calculateSVG() {
+        // convert into SVG file
+        this.svg = exportSVG(this.traces)
     }
 }
 

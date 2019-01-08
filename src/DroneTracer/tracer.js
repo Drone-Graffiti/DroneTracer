@@ -264,27 +264,12 @@ export default class LineTracer {
     }
 
     filterTraces(traces, tolerance = this.config.traceFilterTolerance) {
-        if (this.progressReport) this.progressReport.increaseStep()
-        // TODO: calculate distance based in cm in wall
-        var distance = this.config.drone.minimunDistance
         var smoothTraces = []
 
-        for (let trace of traces) {
-            // Bounding box
-            var boundingbox = [trace[0].x, trace[0].y, trace[0].x, trace[0].y]
-            for(let point of trace) {
-                if (point.x < boundingbox[0]) boundingbox[0] = point.x
-                if (point.x > boundingbox[2]) boundingbox[2] = point.x
-                if (point.y < boundingbox[1]) boundingbox[1] = point.y
-                if (point.y > boundingbox[3]) boundingbox[3] = point.y
-            }
-            // do not process small paths
-            if (boundingbox[2]-boundingbox[0] > distance
-                && boundingbox[3] - boundingbox[1] > distance)
-                smoothTraces.push(simplify(trace, tolerance, true))
-        }
+        for (let trace of traces)
+            smoothTraces.push(simplify(trace, tolerance, true))
 
-        if (this.progressReport) this.progressReport.report(1,1)
+        if (this.progressReport) this.progressReport.reportIncreaseStep()
         return smoothTraces
     }
 

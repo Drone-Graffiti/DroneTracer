@@ -1,3 +1,5 @@
+import * as StackBlur from '../libs/stackblur-es.js'
+
 const generateKernel = function(sigmma, size) {
     const E = 2.718 // Euler's number rounded of to 3 places
     var kernel = []
@@ -34,6 +36,7 @@ const getNeighbors = function(imgSource, x, y, size, repeat = false) {
             var trnsX = x-(size-1)/2+i
             var trnsY = y-(size-1)/2+j
             if (imgSource[trnsY] !== undefined && imgSource[trnsY][trnsX] !== undefined)
+            //if (imgSource[trnsY] && imgSource[trnsY][trnsX])
                 neighbors[i][j] = imgSource[trnsY][trnsX]
             else {
                 if (repeat) neighbors[i][j] = imgSource[y][x]
@@ -100,6 +103,11 @@ export const gaussianBlur = function(imgSource, sigmma = 2.4, size = 5) {
     }, true)
 
     return blurImage
+}
+
+// fast almost Gaussian by Mario Klingemann 
+export const fastBlur = function(imgSource, radius) {
+    return StackBlur.imageDataRGB(imgSource, 0, 0, imgSource.width, imgSource.height, radius)
 }
 
 // imageData should be a canvas imageData object

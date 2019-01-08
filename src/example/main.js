@@ -95,8 +95,6 @@ function tracerTransform(imagefile) {
       }, // log progress
       {
         blurKernel: document.getElementById('range_blur').value*1.0,
-        blurSigma: document.getElementById('range_sigma').value/10.0,
-        //blurSigma: map(document.getElementById('range_blur').value, 3, 11, 1.4, 3.8),
         hysteresisHighThreshold: document.getElementById('range_hthreshold').value*1.0,
         hysteresisLowThreshold: document.getElementById('range_lthreshold').value*1.0,
         contrastConcatLengthFactor: document.getElementById('range_distance').value*1.0,
@@ -110,6 +108,8 @@ function tracerTransform(imagefile) {
     ).then( (dronePaint) => {
         console.timeEnd('TransformProcess')
         preview_zone.innerHTML = dronePaint.svgFile
+        preview_zone.children[0].style.width = '100%'
+        preview_zone.children[0].style.height = '100%'
         display_zone.innerText = dronePaint.svgFile
     });
 

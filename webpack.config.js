@@ -49,11 +49,14 @@ module.exports = {
 		rules: [{
 			enforce: 'pre',
 			test: /\.js$/,
-			exclude: /(node_modules|bower_components|src\/libs)/,
+			exclude: /(node_modules|bower_components|src[\\\/]libs)/,
 			loader: 'eslint-loader',
+			options: {
+				fix: true
+			}
 		}, {
 			test: /\.js$/,
-			exclude: /(node_modules|bower_components|src\/libs)/,
+			exclude: /(node_modules|bower_components|src[\\\/]libs)/,
 			use: {
 				loader: 'babel-loader',
 				options: {

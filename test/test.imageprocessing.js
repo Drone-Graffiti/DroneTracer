@@ -28,16 +28,77 @@ describe('Image Processing', () => {
 	describe('Gaussian Blur', () => {
 		it('Shoud return a Gaussian Blur array', () => {
             var grayscaleImg = ImageProcessing.grayscale(imageData)
+
             var gaussianBlurImg = ImageProcessing.gaussianBlur(grayscaleImg)
             gaussianBlurImg.length.should.be.equals(imageData.height)
             gaussianBlurImg[0].length.should.be.equals(imageData.width)
 
             var expected_image = [
-                [114.27492999999997,186.72557143000003,166.66568641292997,147.61364729282943,123.46381778203856,93.30046695130429,76.64514270801601,74.06730048920969,76.18684289056232,90.97881370649786],
-                [121.00970799807547,189.56660952478143,169.85238390487459,149.76512944143985,126.15675249851583,96.51061350334292,79.62374576813922,76.07869471256923,77.05828100740396,90.99126535766717],
-                [232.37129363718407,218.2392376414254,202.17959604202434,141.3680441777598,129.0395696844371,118.52218148022645,45.170042892024625,41.45406965205647,33.48501550697741,74.4043557498391]
+                [
+                    114.27492999999997,186.72557143000003,166.66568641292997,
+                    147.61364729282943,120.08505778203856,87.80335019130429,
+                    69.53080811325601,66.03643187123693,67.82836954185007,84.1465276896126
+                ],
+                [
+                    121.00970799807547,189.56660952478143,169.7307485448746,149.40222811471983,
+                    121.10258345868176,88.27045805960857,68.8658184703041,63.89126958524633,
+                    64.65587670726092,80.95142705389664
+                ],
+                [
+                    232.36691476422408,218.2202330092225,201.8786408985867,140.51798328507923,
+                    122.48783957137809,104.38265938144487,40.96311351474241,37.10445261063525,
+                    29.974370012752228,71.72975718832012
+                ]
             ]
             expect(gaussianBlurImg).to.be.eql(expected_image)
+        })
+	})
+
+	describe('thresholdFilter', () => {
+		it('Shoud return an absolute 0 | 255 array image', () => {
+            var grayscaleImg = ImageProcessing.grayscale(imageData)
+
+            var thresholdImg = ImageProcessing.thresholdFilter(grayscaleImg, 30)
+            thresholdImg.length.should.be.equals(imageData.height)
+            thresholdImg[0].length.should.be.equals(imageData.width)
+            var expected_image = [
+                [255, 255, 255, 255, 255, 255, 0, 0, 0, 255],
+                [255, 255, 255, 255, 255, 255, 0, 0, 0, 255],
+                [255, 255, 255, 255, 255, 255, 0, 0, 0, 0]
+            ]
+            expect(thresholdImg).to.be.eql(expected_image)
+
+            thresholdImg = ImageProcessing.thresholdFilter(grayscaleImg, 80)
+            var expected_image = [
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [255, 255, 255, 0, 0, 0, 0, 0, 0, 0]
+            ]
+            expect(thresholdImg).to.be.eql(expected_image)
+        })
+	})
+
+	describe('screen', () => {
+		it('Should return an array image masked by a map', () => {
+            var imgSource = [
+                [255, 0, 0, 0, 0, 255, 255, 255, 0],
+                [255, 0, 0, 0, 0, 0,    0,  255, 0],
+                [255, 0, 0, 0, 0, 255, 255, 255, 0]
+            ]
+            var imgMap = [
+                [255, 255, 255, 255, 255, 255, 255, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [255, 255, 0, 0, 0, 255, 255, 255, 255]
+            ]
+
+            var screenImg = ImageProcessing.screen(imgSource, imgMap)
+
+            var expected_image = [
+                [255, 255, 255, 255, 255, 255, 255, 255, 0],
+                [255, 0, 0, 0, 0, 0,    0,  255, 0],
+                [255, 255, 0, 0, 0, 255, 255, 255, 255]
+            ]
+            expect(screenImg).to.be.eql(expected_image)
         })
 	})
 })

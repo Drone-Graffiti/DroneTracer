@@ -56,12 +56,12 @@ class DroneTracer {
              * Image Filtering
              */
 
-            var grayscaleImg = ImageProcessing.grayscale(imageManager.source)
-            progressReport.reportIncreaseStep()
-
             // TODO: improve deviation logic (automate)
             if (transformOptions.centerline) {
                 // Zhang-Suen thinning
+                var grayscaleImg = ImageProcessing.grayscale(imageManager.source)
+                progressReport.reportIncreaseStep()
+
                 var thresholdImg = ImageProcessing.thresholdFilter(grayscaleImg, 45)
                 progressReport.reportIncreaseStep()
 
@@ -87,12 +87,14 @@ class DroneTracer {
             }
             else {
                 // canny edge detection
-                //var gaussianBlurImg = ImageProcessing.gaussianBlur(grayscaleImg,
-                var gaussianBlurImg = ImageProcessing.fastBlur(grayscaleImg,
-                    transformOptions.blurKernel)
+                var gaussianBlurImg = ImageProcessing.fastBlur(
+                    imageManager.source, transformOptions.blurKernel)
                 progressReport.reportIncreaseStep()
 
-                var gradient = ImageProcessing.gradient(gaussianBlurImg)
+                var grayscaleImgData = ImageProcessing.grayscale(gaussianBlurImg)
+                progressReport.reportIncreaseStep()
+
+                var gradient = ImageProcessing.gradient(grayscaleImgData)
                 progressReport.reportIncreaseStep()
 
                 var nmsuImg = ImageProcessing.nonMaximumSuppression(gradient.sobelImage, gradient.dirMap)

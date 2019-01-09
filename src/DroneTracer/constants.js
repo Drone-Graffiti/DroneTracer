@@ -21,4 +21,5 @@ export const defaultTransformOptions = {
     contrastPathLengthFactor: 0.1, // relative %
     contrastConcatLengthFactor: 3, // relative %
     dilationRadius: 4,
+    svgcolor: '#000',
 }

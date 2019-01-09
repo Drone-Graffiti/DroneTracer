@@ -50,4 +50,18 @@ export class ProgressReport {
 
 }
 
+export const uiParamGenerator = function(label, name, value, type = 'range', from = 0, to = 100) {
+    var uiEl = {
+        label: label,
+        name: name,
+        value: value,
+        type: type
+    }
+    if (type == 'range') {
+        uiEl.from = from
+        uiEl.to = to
+    }
+    return uiEl
+}
+
 

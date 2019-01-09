@@ -126,8 +126,36 @@ class DroneTracer {
     }
 
     get uiParams() {
-        // TODO: implement method that return parameters declaration and specs for UI
-        return 0
+        var conf =  constants.defaultTransformOptions
+        var uiParams = []
+        var centerlineToggle =
+            helper.uiParamGenerator('Illustration', 'centerline', conf.centerline, 'toggle')
+        centerlineToggle.nested = { false: [], true: []}
+
+        centerlineToggle.nested.false.push(
+            helper.uiParamGenerator('Blur Radius', 'blurKernel', conf.blurKernel, 'range', 1, 10)
+        )
+        centerlineToggle.nested.false.push(
+            helper.uiParamGenerator('Threshold', 'hysteresisHighThreshold', conf.hysteresisHighThreshold, 'range', 1, 100)
+        )
+        centerlineToggle.nested.true.push(
+            helper.uiParamGenerator('Stroke weight', 'dilationRadius', conf.dilationRadius, 'range', 1, 20)
+        )
+
+        uiParams.push(centerlineToggle)
+
+        // TODO: add colors
+        var colorsGroup = {label: 'Colors', type: 'group', nested: [] }
+        colorsGroup.nested.push(
+            helper.uiParamGenerator('Color', 'svgcolor', '#000', 'radio')
+        )
+        colorsGroup.nested.push(
+            helper.uiParamGenerator('Color', 'svgcolor', '#ff0000', 'radio')
+        )
+
+        uiParams.push(colorsGroup)
+
+        return uiParams
     } 
 }
 

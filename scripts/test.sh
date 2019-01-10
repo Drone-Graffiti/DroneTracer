@@ -6,8 +6,8 @@ cd "$(dirname "$0")" && cd ../
 
 # link assets and source
 if windows; then 
-    cmd <<< "mklink /D \"../node_modules\" \"test\"" > /dev/null
-    cmd <<< "mklink /D \"../src\" \"test\"" > /dev/null
+    cmd <<< "mklink /D .\test\node_modules ..\node_modules" > /dev/null
+    cmd <<< "mklink /D .\test\src ..\src" > /dev/null
 else
     ln -s -f ../node_modules test/
     ln -s -f ../src test/

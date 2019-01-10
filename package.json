@@ -4,6 +4,7 @@
   "description": "Javascript-based library for generating drone-flyable SVG artwork",
   "author": "",
   "private": true,
+  "main": "/dist/DroneTracer.min.js",
   "scripts": {
     "dev": "WEBPACK_ENV=dev webpack --progress --colors --watch",
     "build": "webpack",

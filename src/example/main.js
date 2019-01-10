@@ -59,11 +59,6 @@ document.querySelectorAll('input[type=range]').forEach((el)=>{
     }
 })
 
-const map = function(n, start1, stop1, start2, stop2) {
-    var newval = (n - start1) / (stop1 - start1) * (stop2 - start2) + start2;
-    return newval;
-}
-
 /*
  *     ____  ____   __   __ _  ____  ____  ____   __    ___  ____  ____
  *    (    \(  _ \ /  \ (  ( \(  __)(_  _)(  _ \ / _\  / __)(  __)(  _ \

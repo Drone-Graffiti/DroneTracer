@@ -44,6 +44,7 @@ class DroneTracer {
             }
 
             // TODO: calculate size/resolution of source
+            // minimun resolution (too small = no data)
             
 
             // Initialize ImageManager and source image file

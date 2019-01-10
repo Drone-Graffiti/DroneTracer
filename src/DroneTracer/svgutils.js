@@ -1,4 +1,6 @@
-const traceToSVGPolyline = function(trace, scale = 1, origin = {x:0,y:0}) {
+import polyline2bezier from '../libs/polyline2bezier.js'
+
+export const traceToSVGPolyline = function(trace, scale = 1, origin = {x:0,y:0}) {
     var ePolylineStr = ''
 		
     var ePoly_start = '<polyline points="'
@@ -15,6 +17,32 @@ const traceToSVGPolyline = function(trace, scale = 1, origin = {x:0,y:0}) {
 `
         
     return ePolylineStr
+}
+
+const traceToSVGPath = function(trace, scale = 1, origin = {x:0,y:0}) {
+//const traceToSVGPath = function(trace) {
+    var ePathStr = ''
+
+    var ePath_start = '<path d="'
+    var ePath_end = '" />'
+
+    var arr = trace.map(t=>[(t.x-origin.x)*scale,(t.y-origin.y)*scale])
+    //var arr = trace.map(t=>[t.x,t.y])
+    var bezierCurves = polyline2bezier(arr)
+
+    var pathStr = `M${bezierCurves[0][0].x},${bezierCurves[0][0].y} C`
+
+    for (let segment of bezierCurves) {
+        for (let i = 1; i <= 3; i++) {
+            var point = segment[i]
+            pathStr += ` ${point.x},${point.y}`
+        }
+    }
+
+    ePathStr = `${ePath_start}${pathStr}${ePath_end}
+`
+
+    return ePathStr
 }
 
 export const getBoundingBox = function(traces) {
@@ -95,7 +123,8 @@ export const exportSVG = function(traces, boundingBox, scale) {
 
     var eStr = ''
     for (let trace of traces) {
-        eStr += traceToSVGPolyline(trace, scale, {x:minX, y:minY})
+        //eStr += traceToSVGPolyline(trace, scale, {x:minX, y:minY})
+        eStr += traceToSVGPath(trace, scale, {x:minX, y:minY})
     }
 
     SVGString = SVGHeader + SVGGlobalStyle + eStr + SVGEnd

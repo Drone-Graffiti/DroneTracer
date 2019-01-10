@@ -1,5 +1,5 @@
-import simplify from '../libs/simplify.js'
 import * as helper from './helper.js'
+import simplify from '../libs/simplify.js'
 
 /*
  * Layer and edge node logic base on jankovicsandras imagetracerjs

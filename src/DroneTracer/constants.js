@@ -15,7 +15,7 @@ export const defaultTransformOptions = {
     hysteresisHighThreshold: 50,
     hysteresisLowThreshold: 5,
     centerline: false,
-    traceFilterTolerance: 1.2,
+    traceFilterTolerance: 1.0,
     minimunPathLength: 10,
     targetInfluence: 0.5,
     contrastPathLengthFactor: 0.1, // relative %

@@ -19,28 +19,69 @@ export const traceToSVGPolyline = function(trace, scale = 1, origin = {x:0,y:0})
     return ePolylineStr
 }
 
-const traceToSVGPath = function(trace, scale = 1, origin = {x:0,y:0}) {
-//const traceToSVGPath = function(trace) {
+const traceToBezier = function(trace, scale = 1, origin = {x:0,y:0}) {
+    var bezierCurves = []
+    var clearTrace = []
+    var diffLimit = 7
+
+    // interpolate 'duplicated' points
+    clearTrace.push([trace[0].x, trace[0].y])
+
+    var p1, p2, p3
+    for (let i = 1; i < trace.length-1; i++) {
+        p1 = trace[i-1]
+        p2 = trace[i]
+        var dist = Math.sqrt( Math.pow(p1.x-p2.x,2) + Math.pow(p1.y-p2.y,2) )
+        if (dist > diffLimit) clearTrace.push([ p2.x,p2.y ])
+        else if (i < trace.length-2) {
+            p1 = trace[i-1]
+            p2 = trace[i]
+            p3 = trace[i+1]
+            clearTrace.push([ p2.x + (p1.x-p2.x)/2, p2.y + (p1.y-p2.y)/2 ])
+            clearTrace.push([p2.x, p2.y])
+            clearTrace.push([ p2.x + (p3.x-p2.x)/2, p2.y + (p3.y-p2.y)/2 ])
+            /*
+             *p1 = trace[i]
+             *p2 = trace[i+1]
+             *dist = Math.sqrt( Math.pow(p1.x-p2.x,2) + Math.pow(p1.y-p2.y,2) )
+             *if (dist > diffLimit*2+1) {
+             *    // intepolate
+             *    clearTrace.push([ p2.x + (p1.x-p2.x)/2, p2.y + (p1.y-p2.y)/2 ])
+             *}
+             */
+        }
+    }
+
+    if ( clearTrace.length < 2)
+        bezierCurves = false
+    else {
+        var arr = clearTrace.map(t=>[(t[0]-origin.x)*scale,(t[1]-origin.y)*scale])
+        bezierCurves = polyline2bezier(arr)
+    }
+
+    return bezierCurves
+}
+
+export const traceToSVGPath = function(trace, scale = 1, origin = {x:0,y:0}) {
     var ePathStr = ''
 
     var ePath_start = '<path d="'
     var ePath_end = '" />'
 
-    var arr = trace.map(t=>[(t.x-origin.x)*scale,(t.y-origin.y)*scale])
-    //var arr = trace.map(t=>[t.x,t.y])
-    var bezierCurves = polyline2bezier(arr)
+    var bezierCurves = traceToBezier(trace, scale, origin)
+    if (bezierCurves) {
+        var pathStr = `M${bezierCurves[0][0].x},${bezierCurves[0][0].y} C`
 
-    var pathStr = `M${bezierCurves[0][0].x},${bezierCurves[0][0].y} C`
-
-    for (let segment of bezierCurves) {
-        for (let i = 1; i <= 3; i++) {
-            var point = segment[i]
-            pathStr += ` ${point.x},${point.y}`
+        for (let segment of bezierCurves) {
+            for (let i = 1; i <= 3; i++) {
+                var point = segment[i]
+                pathStr += ` ${point.x},${point.y}`
+            }
         }
-    }
 
-    ePathStr = `${ePath_start}${pathStr}${ePath_end}
-`
+        ePathStr = `${ePath_start}${pathStr}${ePath_end}
+    `
+    }
 
     return ePathStr
 }

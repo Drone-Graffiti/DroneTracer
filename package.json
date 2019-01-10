@@ -8,7 +8,7 @@
     "dev": "WEBPACK_ENV=dev webpack --progress --colors --watch",
     "build": "webpack",
     "release": "npm run build && .\"/scripts/runrelease.sh\" ",
-    "test": ".\"/scripts/test.sh",    
+    "test": ".\"/scripts/test.sh\" ",    
     "interface": "node ./scripts/server.js ./dist/example/ 8080"    
   },
   "devDependencies": {

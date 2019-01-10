@@ -1,4 +1,5 @@
-import { exportSVG } from './svgutils.js'
+import * as svgUtils from './svgutils.js'
+import * as helper from './helper.js'
 
 const calculateEstimatedTime = function(svg) {
     svg = 0
@@ -19,6 +20,7 @@ class DronePaint {
         this.source = source
         this.traces = traces
 
+        this.calculateFlyableConditions()
         this.calculateSVG()
     }
 
@@ -56,8 +58,21 @@ class DronePaint {
     }
 
     calculateSVG() {
+        var boundingBox = svgUtils.getBoundingBox(this.traces)
+        var density = this.counts.accumulated / (
+            (boundingBox.maxX-boundingBox.minX) * (boundingBox.maxY-boundingBox.minY)
+        )
+        var map = helper.map(density, 0, 1, 1, 3000)
+        var scale = 3 + map
         // convert into SVG file
-        this.svg = exportSVG(this.traces)
+        this.svg = svgUtils.exportSVG(this.traces, boundingBox, scale)
+
+        this.counts.painting *= scale
+        this.counts.flying *= scale
+    }
+
+    calculateFlyableConditions() {
+        this.counts = svgUtils.countTraces(this.traces)
     }
 }
 

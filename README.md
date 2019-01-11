@@ -113,7 +113,7 @@ var paintingConfig = {
     gpsLocation: [0000,0000],
     wallSize: [22000, 40000],
     canvasSize: [20000, 20000],
-    canvasPosition: [0, 0], // milimeters (origin = [bottom left])
+    canvasPosition: [0, 0], // millimeters (origin = [bottom left])
     colors: ['#000000', '#eb340f', '#0f71eb'], // default [#000]
 }
 
@@ -136,7 +136,7 @@ tracer.transform(
    * related information to the svg for the drone.
    * This functions does not affect the transformation process.
    */
-  dronePaint.setPaintingPosition(12000, 0) // in milimeters
+  dronePaint.setPaintingPosition(12000, 0) // in millimeters
   dronePaint.setPaintingScale(2.5) // post-scale the svg
   dronePaint.setPaintingColor('#aa0000')
 

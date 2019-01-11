@@ -78,8 +78,8 @@ async function tracerTransform() {
     var paintingConfig = {
         wallId: 'MX19-002',
         gpsLocation: [0, 0],
-        wallSize: [30000, 20000], // in milimeters
-        canvasSize: [20000, 20000], // milimeters
+        wallSize: [30000, 20000], // in millimeters
+        canvasSize: [20000, 20000], // millimeters
         canvasPosition: [100, 0], // (origin = [bottom left])
         colors: ['#000000', '#eb340f', '#0f71eb'], // default [#000]
         droneResolution: 200, 

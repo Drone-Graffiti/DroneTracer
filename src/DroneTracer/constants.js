@@ -6,6 +6,7 @@ export const defaultPaintingConfig = {
     canvasPosition: [0,10], // position of the canvas in the wall [mm]
     colors: ['#000000'],    // single black color
     droneResolution: 0.2,   // drone resolution [m]
+    strokeWeight: 10      // drone paint stroke thickness [cm]
 }
 
 export const requiredPaintingConfigParams = [

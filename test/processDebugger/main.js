@@ -90,65 +90,64 @@ async function tracerTransform() {
         imageManager.source,
         (progress) => { console.log(`${progress}%`) },
         {
-            blurKernel: 3,
-            blurSigma: 1.4,
             centerline: false,
-            contrastConcatLengthFactor: 2,
-            hysteresisHighThreshold: 50,
+            blurKernel: 3,
             traceFilterTolerance: 1.2
         }
     ).then( (dronePaint) => {
         console.log( 'result path: ', dronePaint.svgFile )
     })
 
-    // read the images
-    var imgSource = await readImage(imageManager.source)
-    //var imgTrace = await readImage(imageManager.traceSource)
-    //var imgTrace = await readImage(imageManager.traceSource)
-
-    // decode base64
-    imageManager.source = await ImageManager.base64ToImageData(imgSource)
-    //imageManager.traceSource = await ImageManager.base64ToImageData(imgTrace)
-    //imageManager.differenceSource = imageManager.source
-
-    // canny edge detection
-    var grayscaleImg = ImageProcessing.grayscale(imageManager.source)
-    //var gaussianBlurImg = ImageProcessing.gaussianBlur(grayscaleImg, 2.4, 7)
-    //var gradient = ImageProcessing.gradient(gaussianBlurImg)
-    //var nmsuImg = ImageProcessing.nonMaximumSuppression(gradient.sobelImage, gradient.dirMap)
-    //var hysteresisImg = ImageProcessing.hysteresis(nmsuImg, 50, 10)
-    var thresholdImg = ImageProcessing.thresholdFilter(grayscaleImg, 45)
-    //var gaussianBlurImg = ImageProcessing.gaussianBlur(thresholdImg, 1.4, 3)
-    //thresholdImg = ImageProcessing.thresholdFilter(gaussianBlurImg, 30)
-    var gradient = ImageProcessing.gradient(thresholdImg)
-    var invertSobel = ImageProcessing.invert(gradient.sobelImage)
-    var dilationImg = ImageProcessing.dilation(invertSobel, 4)
-    var screenImg = ImageProcessing.screen(dilationImg, thresholdImg)
-    var thinningImg = ImageProcessing.zsthinning(screenImg)
-
-    // assign maps to ImageManager
-    //imageManager.cannyImageData = hysteresisImg
-    //imageManager.traceSource = ImageProcessing.invert(imageManager.cannyImageData)
-    //imageManager.differenceSource = nmsuImg
-    //imageManager.traceSource = grayscaleImg
-    //imageManager.differenceSource = grayscaleImg
-
-    // display source Image
-    //displayImage(imgSource)
-    background(255)
-
-    console.timeEnd('FilteringProcess')
-
-    //var renderTarget = gaussianBlurImg
-    //var renderTarget = ImageProcessing.invert(gradient.sobelImage)
-    //var renderTarget = thresholdImg
-    //var renderTarget = invertSobel
-    //var renderTarget = dilationImg
-    //var renderTarget = screenImg
-    var renderTarget = thinningImg
-    for (var y = 0; y < renderTarget.length; y++)
-        for (var x = 0; x < renderTarget[0].length; x++)
-            drawPoint(x,y, color(renderTarget[y][x]))
+/*
+ *    // read the images
+ *    var imgSource = await readImage(imageManager.source)
+ *    //var imgTrace = await readImage(imageManager.traceSource)
+ *    //var imgTrace = await readImage(imageManager.traceSource)
+ *
+ *    // decode base64
+ *    imageManager.source = await ImageManager.base64ToImageData(imgSource)
+ *    //imageManager.traceSource = await ImageManager.base64ToImageData(imgTrace)
+ *    //imageManager.differenceSource = imageManager.source
+ *
+ *    // canny edge detection
+ *    var grayscaleImg = ImageProcessing.grayscale(imageManager.source)
+ *    //var gaussianBlurImg = ImageProcessing.gaussianBlur(grayscaleImg, 2.4, 7)
+ *    //var gradient = ImageProcessing.gradient(gaussianBlurImg)
+ *    //var nmsuImg = ImageProcessing.nonMaximumSuppression(gradient.sobelImage, gradient.dirMap)
+ *    //var hysteresisImg = ImageProcessing.hysteresis(nmsuImg, 50, 10)
+ *    var thresholdImg = ImageProcessing.thresholdFilter(grayscaleImg, 45)
+ *    //var gaussianBlurImg = ImageProcessing.gaussianBlur(thresholdImg, 1.4, 3)
+ *    //thresholdImg = ImageProcessing.thresholdFilter(gaussianBlurImg, 30)
+ *    var gradient = ImageProcessing.gradient(thresholdImg)
+ *    var invertSobel = ImageProcessing.invert(gradient.sobelImage)
+ *    var dilationImg = ImageProcessing.dilation(invertSobel, 4)
+ *    var screenImg = ImageProcessing.screen(dilationImg, thresholdImg)
+ *    var thinningImg = ImageProcessing.zsthinning(screenImg)
+ *
+ *    // assign maps to ImageManager
+ *    //imageManager.cannyImageData = hysteresisImg
+ *    //imageManager.traceSource = ImageProcessing.invert(imageManager.cannyImageData)
+ *    //imageManager.differenceSource = nmsuImg
+ *    //imageManager.traceSource = grayscaleImg
+ *    //imageManager.differenceSource = grayscaleImg
+ *
+ *    // display source Image
+ *    //displayImage(imgSource)
+ *    background(255)
+ *
+ *    console.timeEnd('FilteringProcess')
+ *
+ *    //var renderTarget = gaussianBlurImg
+ *    //var renderTarget = ImageProcessing.invert(gradient.sobelImage)
+ *    //var renderTarget = thresholdImg
+ *    //var renderTarget = invertSobel
+ *    //var renderTarget = dilationImg
+ *    //var renderTarget = screenImg
+ *    var renderTarget = thinningImg
+ *    for (var y = 0; y < renderTarget.length; y++)
+ *        for (var x = 0; x < renderTarget[0].length; x++)
+ *            drawPoint(x,y, color(renderTarget[y][x]))
+ */
 
 /*
     // run transformation

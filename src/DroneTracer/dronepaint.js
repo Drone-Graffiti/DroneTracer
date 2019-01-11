@@ -8,13 +8,9 @@ const calculateEstimatedTime = function(svg) {
 
 // Drone Paint provides functions to access and modify related information to the svg for the drone
 class DronePaint {
-    constructor({wallId, dimensions}, {size}, source, traces) {
-        var middleX = dimensions[0]/2.0 - size[0]/2.0
-        var middelY = dimensions[1]/2.0 - size[1]/2.0
-        this.setPaintingPosition( middleX, middelY )
-        this.setPaintingScale( 1.0 )
-
-        this.setPaintingData('wallId', wallId)
+    constructor(paintingConfig, source, traces) {
+        this.paintingConfig = paintingConfig
+        this.setPaintingData('wallId', paintingConfig.wallId)
 
         // asign
         this.source = source
@@ -62,10 +58,11 @@ class DronePaint {
         var density = this.counts.accumulated / (
             (boundingBox.maxX-boundingBox.minX) * (boundingBox.maxY-boundingBox.minY)
         )
+        // TODO: map based on config.strokeWeight
         var map = helper.map(density, 0, 1, 1, 3000)
         var scale = 3 + map
         // convert into SVG file
-        this.svg = svgUtils.exportSVG(this.traces, boundingBox, scale)
+        this.svg = svgUtils.exportSVG(this.traces, this.paintingConfig.strokeWeight, boundingBox, scale)
 
         this.counts.painting *= scale
         this.counts.flying *= scale

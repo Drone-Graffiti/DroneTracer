@@ -123,7 +123,6 @@ class DroneTracer {
             // calculate transformations and create a DronePaint object
             var dronePaint = new DronePaint(
                 this.paintingConfig,
-                transformOptions,
                 source,
                 traces
             )

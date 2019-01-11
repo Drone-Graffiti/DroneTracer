@@ -75,21 +75,20 @@ export const getSVGHeader = function(width, height, description = '', canvasOrig
 `
 }
 
-export const getGlobal = function(color, strokeWidth) {
-    return `<g fill="none" stroke="${color}" stroke-width="${strokeWidth*10}" stroke-linecap="round" stroke-linejoin="round">`
+export const getGlobal = function(color, strokeWeight) {
+    return `<g fill="none" stroke="${color}" stroke-width="${strokeWeight*10}" stroke-linecap="round" stroke-linejoin="round">`
 }
 
-export const exportSVG = function(traces, boundingBox, scale) {
+export const exportSVG = function(traces, strokeWeight, boundingBox, scale) {
     var SVGString = ''
     var description = ''
 
     var {maxX, maxY, minX, minY} = boundingBox
 
-    var strokeWidth = 10
     var w = (maxX-minX)*scale, h = (maxY-minY)*scale
 
     var SVGHeader = getSVGHeader(w, h, description) 
-    var SVGGlobalStyle = getGlobal('#ff0000',strokeWidth)
+    var SVGGlobalStyle = getGlobal('#ff0000',strokeWeight)
     var SVGEnd ='</g></svg>'
 
     var eStr = ''

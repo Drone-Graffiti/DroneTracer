@@ -151,16 +151,11 @@ function tracerTransform(imagefile) {
           console.log(`progress ${progressStatus}%`)
       }, // log progress
       {
-        blurKernel: document.getElementById('range_blur').value*1.0,
-        hysteresisHighThreshold: document.getElementById('range_hthreshold').value*1.0,
-        hysteresisLowThreshold: document.getElementById('range_lthreshold').value*1.0,
-        contrastConcatLengthFactor: document.getElementById('range_distance').value*1.0,
-        traceFilterTolerance: document.getElementById('range_smooth').value/10.0,
         centerline: document.getElementById('checkbox_centerline').checked,
-        dilationRadius: document.getElementById('range_dilation').value*1.0,
-        drone: {
-            minimunDistance: 10
-        }
+        blurKernel: document.getElementById('range_blurKernel').value*1.0,
+        hysteresisHighThreshold: document.getElementById('range_hysteresisHighThreshold').value*1.0,
+        binaryThreshold: document.getElementById('range_binaryThreshold').value*1.0,
+        dilationRadius: document.getElementById('range_dilationRadius').value*1.0,
       }
     ).then( (dronePaint) => {
         console.timeEnd('TransformProcess')

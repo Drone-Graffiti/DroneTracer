@@ -6,3 +6,7 @@ build/
 
 # release dist on master version
 # dist/
+
+# ignore test links
+test/node_modules
+test/src

@@ -7,21 +7,131 @@
 
     <title>DroneTracer</title>
     <style>
-        #drop_zone {
-            width: 50%;
-            padding: 60px 20px;
+        .center {
+            width: 80%;
             margin: 0 auto;
+            display: block;
+        }
+
+        #drop_zone {
+            padding: 70px 20px;
             border: solid 1px #aaaaaa;
             color: #101010;
             text-align: center;
             font-size: 18px;
         }
+
+        #preview_zone {
+            padding: 0px;
+            border: solid 1px #aaaaaa;
+            margin: 20px auto;
+        }
+
+        label {
+            margin: 30px auto 0 auto !important;
+        }
+
+        input[type=range] {
+            margin: 20px auto;
+            position: relative;
+        }
+
+        input[type=range]::after {
+            content: attr(value);
+            display: block;
+            position: absolute;
+            top: -10px;
+            right: 0;
+        }
+        /* The switch - the box around the slider */
+        .switch {
+          position: relative;
+          display: inline-block;
+          width: 60px;
+          height: 34px;
+          margin-top: 10px !important;
+        }
+
+        /* Hide default HTML checkbox */
+        .switch input {
+          opacity: 0;
+          width: 0;
+          height: 0;
+        }
+
+        /* The slider */
+        .slider {
+          position: absolute;
+          cursor: pointer;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background-color: #ccc;
+          -webkit-transition: .4s;
+          transition: .4s;
+        }
+
+        .slider:before {
+          position: absolute;
+          content: "";
+          height: 26px;
+          width: 26px;
+          left: 4px;
+          bottom: 4px;
+          background-color: white;
+          -webkit-transition: .4s;
+          transition: .4s;
+        }
+
+        input:checked + .slider {
+          background-color: #2196F3;
+        }
+
+        input:focus + .slider {
+          box-shadow: 0 0 1px #2196F3;
+        }
+
+        input:checked + .slider:before {
+          -webkit-transform: translateX(26px);
+          -ms-transform: translateX(26px);
+          transform: translateX(26px);
+        }
+
+        input[type=radio] {
+            width: 50px;
+            height: 50px;
+        }
+
+        .block {
+            position: relative;
+            display: inline-block;
+            padding: 10px 30px;
+        }
+
+        .block label {
+            display: block;
+        }
+
+        /* Rounded sliders */
+        .slider.round {
+          border-radius: 34px;
+        }
+
+        .slider.round:before {
+          border-radius: 50%;
+        }
     </style>
     </head>
     <body>
-        <div id="drop_zone">
+        <div id="drop_zone" class="center">
             <p><b>📂</b> Drag a files to this Drop Zone ... </p>
         </div>
+        <div id="uiControls" class="controls">
+            ranges and colors
+        </div>
+        <div id="preview_zone" class="center"></div>
+        <textarea rows="14" cols="75" id="display_zone" class="center"></textarea>
         <script src="/DroneTracer.min.js"></script>
         <script src="/main.js"></script>
     </body>

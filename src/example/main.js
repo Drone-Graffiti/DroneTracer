@@ -182,6 +182,6 @@ var paintingConfig = {
 // Instance of a drone tracer
 var tracer = new DroneTracer(paintingConfig)
 
-renderUI(tracer.uiParams)
+renderUI(tracer.uiParameters)
 
 

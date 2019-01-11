@@ -131,7 +131,7 @@ class DroneTracer {
         })
     }
 
-    get uiParams() {
+    get uiParameters() {
         var conf =  constants.defaultTransformOptions
         var uiParams = []
         uiParams.push(

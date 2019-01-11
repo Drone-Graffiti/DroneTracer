@@ -75,33 +75,31 @@ var imageManager = new ImageManager()
 async function tracerTransform() {
     console.time('FilteringProcess')
 
-/*
- *    var paintingConfig = {
- *        wallId: 1,
- *        gpsLocation: [-99.134982,19.413494],
- *        dimensions: [30.4, 22.07],
- *        colors: ['#000000', '#eb340f', '#0f71eb'], // default [#000]
- *        droneResolution: 0.1, // default 0.2
- *    }
- *    var tracer = new DroneTracer(paintingConfig)
- *
- *    tracer.transform(
- *        imageManager.source,
- *        (progress) => { console.log(`${progress}%`) },
- *        {
- *            blurKernel: 3,
- *            blurSigma: 1.4,
- *            centerline: false,
- *            contrastConcatLengthFactor: 2,
- *            drone: {minimunDistance: 10},
- *            hysteresisHighThreshold: 50,
- *            hysteresisLowThreshold: 5,
- *            traceFilterTolerance: 1
- *        }
- *    ).then( (dronePaint) => {
- *        console.log( 'result path: ', dronePaint.svgFile )
- *    })
- */
+    var paintingConfig = {
+        wallId: 'MX19-002',
+        gpsLocation: [-99.134982,19.413494],
+        wallSize: [30, 20], // in meters
+        canvasSize: [20, 20], // meters
+        canvasPosition: [10, 0], // meters (origin = [bottom left])
+        colors: ['#000000', '#eb340f', '#0f71eb'], // default [#000]
+        droneResolution: 0.2, // in meters
+    }
+    var tracer = new DroneTracer(paintingConfig)
+
+    tracer.transform(
+        imageManager.source,
+        (progress) => { console.log(`${progress}%`) },
+        {
+            blurKernel: 3,
+            blurSigma: 1.4,
+            centerline: false,
+            contrastConcatLengthFactor: 2,
+            hysteresisHighThreshold: 50,
+            traceFilterTolerance: 1.2
+        }
+    ).then( (dronePaint) => {
+        console.log( 'result path: ', dronePaint.svgFile )
+    })
 
     // read the images
     var imgSource = await readImage(imageManager.source)

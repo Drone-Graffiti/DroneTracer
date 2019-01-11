@@ -98,6 +98,21 @@
           transform: translateX(26px);
         }
 
+        input[type=radio] {
+            width: 50px;
+            height: 50px;
+        }
+
+        .block {
+            position: relative;
+            display: inline-block;
+            padding: 10px 30px;
+        }
+
+        .block label {
+            display: block;
+        }
+
         /* Rounded sliders */
         .slider.round {
           border-radius: 34px;
@@ -112,7 +127,7 @@
         <div id="drop_zone" class="center">
             <p><b>📂</b> Drag a files to this Drop Zone ... </p>
         </div>
-        <div class="controls">
+        <div id="uiControls" class="controls">
             <label class="center">Illustration (centerline)</label>
             <div class="center">
                 <label class="switch">

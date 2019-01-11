@@ -87,6 +87,14 @@ var createUiElement = function(type, name, classname = '', value = false) {
     return el
 }
 
+var dronePaintObj = {}
+var changeColor = function(val) {
+    dronePaintObj.setPaintingColor(val)
+    preview_zone.innerHTML = dronePaintObj.svgFile
+    preview_zone.children[0].style.width = '100%'
+    preview_zone.children[0].style.height = '100%'
+    display_zone.innerText = dronePaintObj.svgFile
+}
 var renderUI = function(list) {
     uiControlsEl.innerHTML = ''
     console.log(list)
@@ -98,7 +106,7 @@ var renderUI = function(list) {
                 if( el.label === 'Colors') {
                     var bEl = createUiElement('div', '', 'block')
                     bEl.appendChild( createUiElement('label', gEl.value) )
-                    bEl.appendChild( createUiElement(gEl.type, gEl.name) )
+                    bEl.appendChild( createUiElement(gEl.type, gEl.name, '', gEl.value) )
                     divEl.appendChild(bEl)
                     divEl.className = 'group center'
                 }
@@ -119,10 +127,19 @@ var renderUI = function(list) {
     }
 
 
+    // update range UI
     document.querySelectorAll('input[type=range]').forEach((el)=>{
         el.setAttribute('value', el.value)
         el.oninput = function(e) {
             e.srcElement.setAttribute('value', this.value)
+        }
+    })
+
+    // call color change
+    document.querySelectorAll('input[type=radio]').forEach((el)=>{
+        var value = el.value
+        el.onchange = function(e) {
+            changeColor(value)
         }
     })
 }
@@ -158,6 +175,7 @@ function tracerTransform(imagefile) {
         dilationRadius: document.getElementById('range_dilationRadius').value*1.0,
       }
     ).then( (dronePaint) => {
+        dronePaintObj = dronePaint
         console.timeEnd('TransformProcess')
         preview_zone.innerHTML = dronePaint.svgFile
         preview_zone.children[0].style.width = '100%'
@@ -170,13 +188,13 @@ function tracerTransform(imagefile) {
 
 // Painting wall configuration
 var paintingConfig = {
-    wallId: 'MX19-002',
-    gpsLocation: [-99.134982,19.413494],
-    wallSize: [30, 20], // in meters
-    canvasSize: [20, 20], // meters
-    canvasPosition: [10, 0], // meters (origin = [bottom left])
+    wallId: 'MX19-001',
+    gpsLocation: [0,0],
+    wallSize: [30000, 20000], // in meters
+    canvasSize: [20000, 20000], // meters
+    canvasPosition: [10000, 0], // meters (origin = [bottom left])
     colors: ['#000000', '#eb340f', '#0f71eb'], // default [#000]
-    droneResolution: 0.2, // in meters
+    droneResolution: 200, // in meters
 }
 
 // Instance of a drone tracer

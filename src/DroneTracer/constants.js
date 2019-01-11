@@ -1,12 +1,12 @@
 // default painting configuration values
 export const defaultPaintingConfig = {
     wallId: 'MX19-001', 
-    wallSize: [33, 50],     // width [m], height [mm]
-    canvasSize: [33, 10],   // canvas area size [mm]
-    canvasPosition: [0,10], // position of the canvas in the wall [mm]
+    wallSize: [33000, 50000],     // width [mm], height [mm]
+    canvasSize: [33000, 10000],   // canvas area size [mm]
+    canvasPosition: [0,10000], // position of the canvas in the wall [mm]
     colors: ['#000000'],    // single black color
-    droneResolution: 0.2,   // drone resolution [m]
-    strokeWeight: 10      // drone paint stroke thickness [cm]
+    droneResolution: 200,   // drone resolution [mm]
+    strokeWeight: 100      // drone paint stroke thickness [mm]
 }
 
 export const requiredPaintingConfigParams = [

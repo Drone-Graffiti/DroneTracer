@@ -73,13 +73,20 @@ class DronePaint {
         // calculate flyable path
         this.counts = svgUtils.countTraces(this.traces)
 
-        // find boundingBox
-        var {maxX, maxY, minX, minY} = svgUtils.getBoundingBox(this.traces)
+        var maxX = 0, maxY = 0, minX = 0, minY = 0
+        var scale = 1
 
-        // find scale factor
-        var density = this.counts.accumulated / ( (maxX-minX)*(maxY-minY) )
-        var map = helper.map(density, 0, 1, 0, this.paintingConfig.strokeWeight*3)
-        var scale = (6+map) * this.paintingScale
+        if (this.counts > 0) {
+            // find boundingBox
+            var boundingBox = svgUtils.getBoundingBox(this.traces)
+            maxX = boundingBox.maxX, maxY = boundingBox.maxY
+            minX = boundingBox.minX, minY = boundingBox.minY
+
+            // find scale factor
+            var density = this.counts.accumulated / ( (maxX-minX)*(maxY-minY) )
+            var map = helper.map(density, 0, 1, 0, this.paintingConfig.strokeWeight*3)
+            scale = (6+map) * this.paintingScale
+        }
 
         // calculate size in mm
         var w = (maxX-minX)*scale, h = (maxY-minY)*scale
@@ -92,7 +99,8 @@ class DronePaint {
 
         this.SVGPaths= ''
         for (let trace of this.traces) {
-            this.SVGPaths += svgUtils.traceToSVGPolyline(trace, scale, {x:minX, y:minY})
+            //this.SVGPaths += svgUtils.traceToSVGPolyline(trace, scale, {x:minX, y:minY})
+            this.SVGPaths += svgUtils.traceToSVGPath(trace, scale, {x:minX, y:minY})
         }
 
         // scale counts

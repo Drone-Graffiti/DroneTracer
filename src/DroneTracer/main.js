@@ -32,7 +32,7 @@ class DroneTracer {
         var progressReport = new helper.ProgressReport(progress)
 
         // calculate number of steps
-        var progressSteps = transformOptions.centerline ? 13 : 12
+        var progressSteps = transformOptions.centerline ? 14 : 13
         progressReport.setSteps(progressSteps)
 
         return new Promise( async (resolve, reject) => {

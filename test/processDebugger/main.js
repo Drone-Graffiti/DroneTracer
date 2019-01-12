@@ -90,6 +90,7 @@ async function tracerTransform() {
         (progress) => { console.log(`${progress}%`) },
         {
             centerline: false,
+            //centerline: true,
             blurKernel: 3,
             traceFilterTolerance: 1.2
         }

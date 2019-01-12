@@ -22,7 +22,11 @@ class DroneTracer {
     transform(source, progress = ()=>{}, options = {}) {
         // check parameters
         if (source === undefined) helper.throw('source image is required. |Image API|')
+
         var transformOptions = Object.assign({}, constants.defaultTransformOptions, options)
+        // map default options
+        if (options.lowThreshold === undefined)
+            options.lowThreshold == transformOptions.highThreshold * 0.10
 
         // create a ProgressReport instance
         var progressReport = new helper.ProgressReport(progress)
@@ -63,7 +67,8 @@ class DroneTracer {
                 var grayscaleImg = ImageProcessing.grayscale(imageManager.source)
                 progressReport.reportIncreaseStep()
 
-                var thresholdImg = ImageProcessing.thresholdFilter(grayscaleImg, 45)
+                var thresholdImg = ImageProcessing.thresholdFilter(
+                    grayscaleImg, transformOptions.binaryThreshold)
                 progressReport.reportIncreaseStep()
 
                 var igradient = ImageProcessing.gradient(thresholdImg)
@@ -119,7 +124,6 @@ class DroneTracer {
             // calculate transformations and create a DronePaint object
             var dronePaint = new DronePaint(
                 this.paintingConfig,
-                transformOptions,
                 source,
                 traces
             )
@@ -128,33 +132,49 @@ class DroneTracer {
         })
     }
 
-    get uiParams() {
+    get uiParameters() {
         var conf =  constants.defaultTransformOptions
         var uiParams = []
-        var centerlineToggle =
-            helper.uiParamGenerator('Illustration', 'centerline', conf.centerline, 'toggle')
-        centerlineToggle.nested = { false: [], true: []}
+        uiParams.push(
+            helper.uiParamGenerator('Illustration', 'centerline', conf.centerline, 'checkbox')
+        )
 
-        centerlineToggle.nested.false.push(
+        var paramsGroup = {label: 'Photo parameters', type: 'group', nested: [] }
+        paramsGroup.condition = 'centerline === false'
+
+        paramsGroup.nested.push(
             helper.uiParamGenerator('Blur Radius', 'blurKernel', conf.blurKernel, 'range', 1, 10)
         )
-        centerlineToggle.nested.false.push(
-            helper.uiParamGenerator('Threshold', 'hysteresisHighThreshold', conf.hysteresisHighThreshold, 'range', 1, 100)
-        )
-        centerlineToggle.nested.true.push(
-            helper.uiParamGenerator('Stroke weight', 'dilationRadius', conf.dilationRadius, 'range', 1, 20)
+        paramsGroup.nested.push(
+            helper.uiParamGenerator(
+                'Threshold', 'hysteresisHighThreshold', conf.hysteresisHighThreshold, 'range', 1, 100
+            )
         )
 
-        uiParams.push(centerlineToggle)
+        uiParams.push(paramsGroup)
 
-        // TODO: add colors
+        paramsGroup = {label: 'Illustration parameters', type: 'group', nested: [] }
+        paramsGroup.condition = 'centerline === true'
+
+        paramsGroup.nested.push(
+            helper.uiParamGenerator(
+                'Color threshold', 'binaryThreshold', conf.binaryThreshold, 'range', 0, 100
+            )
+        )
+        paramsGroup.nested.push(
+            helper.uiParamGenerator(
+                'Stroke weight', 'dilationRadius', conf.dilationRadius, 'range', 1, 20
+            )
+        )
+
+        uiParams.push(paramsGroup)
+
         var colorsGroup = {label: 'Colors', type: 'group', nested: [] }
-        colorsGroup.nested.push(
-            helper.uiParamGenerator('Color', 'svgcolor', '#000', 'radio')
-        )
-        colorsGroup.nested.push(
-            helper.uiParamGenerator('Color', 'svgcolor', '#ff0000', 'radio')
-        )
+        this.paintingConfig.colors.forEach( color => {
+            colorsGroup.nested.push(
+                helper.uiParamGenerator(color, 'svgcolor', color, 'radio')
+            )
+        })
 
         uiParams.push(colorsGroup)
 

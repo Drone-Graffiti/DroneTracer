@@ -1,25 +1,31 @@
 // default painting configuration values
 export const defaultPaintingConfig = {
-    dimensions: [33, 50],   // width [m], height [m]
+    wallId: 'MX19-001', 
+    wallSize: [33000, 50000],     // width [mm], height [mm]
+    canvasSize: [33000, 10000],   // canvas area size [mm]
+    canvasPosition: [0,10000], // position of the canvas in the wall [mm]
     colors: ['#000000'],    // single black color
-    droneResolution: 0.2,   // drone resolution [m]
+    droneResolution: 200,   // drone resolution [mm]
+    strokeWeight: 100      // drone paint stroke thickness [mm]
 }
 
-export const requiredPaintingConfigParams = ['wallId', 'gpsLocation', 'dimensions']
+export const requiredPaintingConfigParams = [
+    'wallId', 'gpsLocation',
+    'wallSize', 'canvasSize', 'canvasPosition',
+]
 
 
 // default transformation options
 export const defaultTransformOptions = {
-    size: [4, 3], // default graffiti size 4m x 3m
+    centerline: false,
     blurKernel: 4,
     hysteresisHighThreshold: 50,
     hysteresisLowThreshold: 5,
-    centerline: false,
-    traceFilterTolerance: 1.0,
+    binaryThreshold: 45,
+    traceFilterTolerance: 1.2,
     minimunPathLength: 10,
     targetInfluence: 0.5,
     contrastPathLengthFactor: 0.1, // relative %
     contrastConcatLengthFactor: 3, // relative %
     dilationRadius: 4,
-    svgcolor: '#000',
 }

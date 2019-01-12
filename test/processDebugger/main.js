@@ -3,7 +3,6 @@ import DroneTracer from '/src/DroneTracer/main.js'
 import { readImage, isAnImageFile } from '/src/DroneTracer/filereader.js'
 import LineTracer from '/src/DroneTracer/tracer.js'
 import ImageManager from '/src/DroneTracer/imagemanager.js'
-import { exportSVG } from '/src/DroneTracer/svgutils.js'
 import * as ImageProcessing from '/src/DroneTracer/imageprocessing.js'
 
 // Check for the various File API support.
@@ -76,24 +75,25 @@ async function tracerTransform() {
     console.time('FilteringProcess')
 
     var paintingConfig = {
-        wallId: 1,
-        gpsLocation: [-99.134982,19.413494],
-        dimensions: [30.4, 22.07],
+        wallId: 'MX19-002',
+        gpsLocation: [0, 0],
+        wallSize: [30000, 20000], // in millimeters
+        canvasSize: [20000, 20000], // millimeters
+        canvasPosition: [100, 0], // (origin = [bottom left])
         colors: ['#000000', '#eb340f', '#0f71eb'], // default [#000]
-        droneResolution: 0.1, // default 0.2
+        droneResolution: 200, 
     }
-
     var tracer = new DroneTracer(paintingConfig)
 
     tracer.transform(
         imageManager.source,
         (progress) => { console.log(`${progress}%`) },
         {
+            centerline: false,
             blurKernel: 3,
-            centerline: false
+            traceFilterTolerance: 1.2
         }
     ).then( (dronePaint) => {
-        debugger
         console.log( 'result path: ', dronePaint.svgFile )
     })
 
@@ -107,6 +107,7 @@ async function tracerTransform() {
  *    imageManager.source = await ImageManager.base64ToImageData(imgSource)
  *    //imageManager.traceSource = await ImageManager.base64ToImageData(imgTrace)
  *    //imageManager.differenceSource = imageManager.source
+<<<<<<< HEAD
  *
  *    // canny edge detection
  *     debugger
@@ -127,6 +128,24 @@ async function tracerTransform() {
  *    //var screenImg = ImageProcessing.screen(dilationImg, thresholdImg)
  *    //var thinningImg = ImageProcessing.zsthinning(screenImg)
  *
+=======
+ *
+ *    // canny edge detection
+ *    var grayscaleImg = ImageProcessing.grayscale(imageManager.source)
+ *    //var gaussianBlurImg = ImageProcessing.gaussianBlur(grayscaleImg, 2.4, 7)
+ *    //var gradient = ImageProcessing.gradient(gaussianBlurImg)
+ *    //var nmsuImg = ImageProcessing.nonMaximumSuppression(gradient.sobelImage, gradient.dirMap)
+ *    //var hysteresisImg = ImageProcessing.hysteresis(nmsuImg, 50, 10)
+ *    var thresholdImg = ImageProcessing.thresholdFilter(grayscaleImg, 45)
+ *    //var gaussianBlurImg = ImageProcessing.gaussianBlur(thresholdImg, 1.4, 3)
+ *    //thresholdImg = ImageProcessing.thresholdFilter(gaussianBlurImg, 30)
+ *    var gradient = ImageProcessing.gradient(thresholdImg)
+ *    var invertSobel = ImageProcessing.invert(gradient.sobelImage)
+ *    var dilationImg = ImageProcessing.dilation(invertSobel, 4)
+ *    var screenImg = ImageProcessing.screen(dilationImg, thresholdImg)
+ *    var thinningImg = ImageProcessing.zsthinning(screenImg)
+ *
+>>>>>>> develop
  *    // assign maps to ImageManager
  *    //imageManager.cannyImageData = hysteresisImg
  *    //imageManager.traceSource = ImageProcessing.invert(imageManager.cannyImageData)
@@ -142,13 +161,20 @@ async function tracerTransform() {
  *
  *    //var renderTarget = gaussianBlurImg
  *    //var renderTarget = ImageProcessing.invert(gradient.sobelImage)
+<<<<<<< HEAD
  *    //var renderTarget = nmsuImg
  *    var renderTarget = hysteresisImg
+=======
+>>>>>>> develop
  *    //var renderTarget = thresholdImg
  *    //var renderTarget = invertSobel
  *    //var renderTarget = dilationImg
  *    //var renderTarget = screenImg
+<<<<<<< HEAD
  *    //var renderTarget = thinningImg
+=======
+ *    var renderTarget = thinningImg
+>>>>>>> develop
  *    for (var y = 0; y < renderTarget.length; y++)
  *        for (var x = 0; x < renderTarget[0].length; x++)
  *            drawPoint(x,y, color(renderTarget[y][x]))

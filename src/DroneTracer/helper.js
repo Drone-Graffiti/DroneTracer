@@ -1,13 +1,13 @@
-const formMessage = function(caller, msg) {
-    return `DroneTracer, ${caller} | ${msg}`
+const formMessage = function(msg) {
+    return `DroneTracer | ${msg}`
 }
 
 const errorThrow = function(msg) {
-    throw formMessage(arguments.callee.caller.name, msg)
+    throw formMessage(msg)
 }
 
 const errorReject = function(promiseReject, msg) {
-    promiseReject( formMessage(arguments.callee.caller.name, msg) )
+    promiseReject( formMessage(msg) )
 }
 
 export {errorThrow as throw, errorReject as reject}

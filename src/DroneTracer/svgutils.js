@@ -126,7 +126,7 @@ export const countTraces = function(traces) {
     return result
 }
 
-export const getSVGHeader = function(width, height, description = '', canvasOrigin = {x:0,y:0}) {
+export const getSVGHeader = function(width, height, canvasOrigin = {x:0,y:0}, config) {
     var viewBox = `viewBox="0 0 ${width} ${height}"`
     var size = `width="${width}mm" height="${height}mm"`
 
@@ -136,38 +136,14 @@ export const getSVGHeader = function(width, height, description = '', canvasOrig
     ${size}
     version="1.1"
     xmlns="http://www.w3.org/2000/svg"
-    desc="${description}"
     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
     xmlns:svg="http://www.w3.org/2000/svg"
     xmlns:wallCanvas="http://www.drone.paint/"
     wallCanvas:origin="${canvasOrigin.x} ${canvasOrigin.y}" >
+    wallCanvas:wallId="${config.wallId}" >
 `
 }
 
-export const getGlobal = function(color, strokeWidth) {
-    return `<g fill="none" stroke="${color}" stroke-width="${strokeWidth*10}" stroke-linecap="round" stroke-linejoin="round">`
-}
-
-export const exportSVG = function(traces, boundingBox, scale) {
-    var SVGString = ''
-    var description = ''
-
-    var {maxX, maxY, minX, minY} = boundingBox
-
-    var strokeWidth = 10
-    var w = (maxX-minX)*scale, h = (maxY-minY)*scale
-
-    var SVGHeader = getSVGHeader(w, h, description) 
-    var SVGGlobalStyle = getGlobal('#ff0000',strokeWidth)
-    var SVGEnd ='</g></svg>'
-
-    var eStr = ''
-    for (let trace of traces) {
-        //eStr += traceToSVGPolyline(trace, scale, {x:minX, y:minY})
-        eStr += traceToSVGPath(trace, scale, {x:minX, y:minY})
-    }
-
-    SVGString = SVGHeader + SVGGlobalStyle + eStr + SVGEnd
-
-    return SVGString
+export const getGlobal = function(color, strokeWeight) {
+    return `<g fill="none" stroke="${color}" stroke-width="${strokeWeight}" stroke-linecap="round" stroke-linejoin="round">`
 }

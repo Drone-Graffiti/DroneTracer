@@ -97,7 +97,7 @@ var changeColor = function(val) {
 }
 var renderUI = function(list) {
     uiControlsEl.innerHTML = ''
-    console.log(list)
+    //console.log(list)
 
     for (var el of list) {
         if (el.type === 'group') {
@@ -144,9 +144,17 @@ var renderUI = function(list) {
     })
 }
 
-const map = function(n, start1, stop1, start2, stop2) {
-    var newval = (n - start1) / (stop1 - start1) * (stop2 - start2) + start2;
-    return newval;
+function msToTime(duration) {
+    var milliseconds = parseInt((duration % 1000) / 100),
+    seconds = parseInt((duration / 1000) % 60),
+    minutes = parseInt((duration / (1000 * 60)) % 60),
+    hours = parseInt((duration / (1000 * 60 * 60)) % 24)
+
+    hours = (hours < 10) ? "0" + hours : hours
+    minutes = (minutes < 10) ? "0" + minutes : minutes
+    seconds = (seconds < 10) ? "0" + seconds : seconds
+
+    return hours + ":" + minutes + ":" + seconds + "." + milliseconds
 }
 
 /*
@@ -177,6 +185,7 @@ function tracerTransform(imagefile) {
     ).then( (dronePaint) => {
         dronePaintObj = dronePaint
         console.timeEnd('TransformProcess')
+        console.log('Estimated Time', msToTime(dronePaint.estimatedTime))
         preview_zone.innerHTML = dronePaint.svgFile
         preview_zone.children[0].style.width = '100%'
         preview_zone.children[0].style.height = '100%'
@@ -194,7 +203,8 @@ var paintingConfig = {
     canvasSize: [20000, 20000], // meters
     canvasPosition: [10000, 0], // meters (origin = [bottom left])
     colors: ['#000000', '#eb340f', '#0f71eb'], // default [#000]
-    droneResolution: 200, // in meters
+    droneResolution: 200,  // in meters
+    droneFlyingSpeed: 0.3, // average drone flying speed [m/s]
 }
 
 // Instance of a drone tracer

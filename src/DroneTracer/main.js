@@ -32,7 +32,7 @@ class DroneTracer {
         var progressReport = new helper.ProgressReport(progress)
 
         // calculate number of steps
-        var progressSteps = transformOptions.centerline ? 13 : 12
+        var progressSteps = transformOptions.centerline ? 14 : 13
         progressReport.setSteps(progressSteps)
 
         return new Promise( async (resolve, reject) => {
@@ -43,16 +43,28 @@ class DroneTracer {
             if(typeof(source) === 'string') imageFile = source 
 
             else {
-                if(!isAnImageFile(source)) helper.reject(reject, 'Not an image file')
+                if(!isAnImageFile(source)) {
+                    helper.reject(reject, 'Not an image file')
+                    return
+                }
                 imageFile = await readImage(source)
             }
 
-            // TODO: calculate size/resolution of source
             
 
             // Initialize ImageManager and source image file
             var imageManager = new ImageManager()
             imageManager.source = await ImageManager.base64ToImageData(imageFile)
+
+            // minimun resolution (too small = no data)
+            if( imageManager.source.width < this.paintingConfig.minimumImageSize[0]
+                || imageManager.source.height < this.paintingConfig.minimumImageSize[1]
+            ) {
+                helper.reject(reject,
+                    `Image is too small, minimum image size is ${this.paintingConfig.minimumImageSize}`
+                )
+                return
+            }
 
             progressReport.reportIncreaseStep()
 

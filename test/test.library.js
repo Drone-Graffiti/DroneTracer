@@ -23,13 +23,19 @@ describe('Library', () => {
             }
             expect(construct).to.throw()
 
-            var tracer = new DroneTracer({wallId: 12, gpsLocation: [0,0], dimensions: [0,0]})
-            tracer.paintingConfig.wallId.should.be.equals(12)
+            var tracer = new DroneTracer({
+                wallId: 'WID01', gpsLocation: [0,0], 
+                wallSize: [0,0], canvasSize: [0, 0], canvasPosition: [0,0]
+            })
+            tracer.paintingConfig.wallId.should.be.equals('WID01')
         })
     })
 
     describe('#Transform', () => {
-        var tracer = new DroneTracer({wallId: 1, gpsLocation: [0,0], dimensions: [0,0]})
+        var tracer = new DroneTracer({
+            wallId: 1, gpsLocation: [0,0], 
+            wallSize: [0,0], canvasSize: [0, 0], canvasPosition: [0,0]
+        })
         it('Should check parameters', () => {
             expect(tracer.transform).to.throw()
 
@@ -55,7 +61,10 @@ describe('Library', () => {
     })
 
     describe('#DronePaint object', () => {
-        var tracer = new DroneTracer({wallId: 1, gpsLocation: [0,0], dimensions: [0,0]})
+        var tracer = new DroneTracer({
+            wallId: 1, gpsLocation: [0,0], 
+            wallSize: [0,0], canvasSize: [0, 0], canvasPosition: [0,0]
+        })
 
         it('Should not accept negative scaling factors', async ()=> {
             var dronePaint = await tracer.transform(imageFile)

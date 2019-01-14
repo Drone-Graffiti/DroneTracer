@@ -1,3 +1,5 @@
+import polyline2bezier from '../libs/polyline2bezier.js'
+
 export const traceToSVGPolyline = function(trace, scale = 1, origin = {x:0,y:0}) {
     var ePolylineStr = ''
 		
@@ -15,6 +17,39 @@ export const traceToSVGPolyline = function(trace, scale = 1, origin = {x:0,y:0})
 `
         
     return ePolylineStr
+}
+
+const traceToBezier = function(trace, scale = 1, origin = {x:0,y:0}) {
+    var bezierCurves = []
+
+    var arr = trace.map(t=>[(t.x-origin.x)*scale,(t.y-origin.y)*scale])
+    bezierCurves = polyline2bezier(arr)
+
+    return bezierCurves
+}
+
+export const traceToSVGPath = function(trace, scale = 1, origin = {x:0,y:0}) {
+    var ePathStr = ''
+
+    var ePath_start = '<path d="'
+    var ePath_end = '" />'
+
+    var bezierCurves = traceToBezier(trace, scale, origin)
+    if (bezierCurves) {
+        var pathStr = `M${bezierCurves[0][0].x},${bezierCurves[0][0].y} C`
+
+        for (let segment of bezierCurves) {
+            for (let i = 1; i <= 3; i++) {
+                var point = segment[i]
+                pathStr += ` ${point.x},${point.y}`
+            }
+        }
+
+        ePathStr = `${ePath_start}${pathStr}${ePath_end}
+    `
+    }
+
+    return ePathStr
 }
 
 export const getBoundingBox = function(traces) {
@@ -57,7 +92,7 @@ export const countTraces = function(traces) {
     return result
 }
 
-export const getSVGHeader = function(width, height, canvasOrigin = {x:0,y:0}, config) {
+export const getSVGHeader = function(width, height, possition, config) {
     var viewBox = `viewBox="0 0 ${width} ${height}"`
     var size = `width="${width}mm" height="${height}mm"`
 
@@ -70,7 +105,7 @@ export const getSVGHeader = function(width, height, canvasOrigin = {x:0,y:0}, co
     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
     xmlns:svg="http://www.w3.org/2000/svg"
     xmlns:wallCanvas="http://www.drone.paint/"
-    wallCanvas:origin="${canvasOrigin.x} ${canvasOrigin.y}" >
+    wallCanvas:origin="${possition[0]} ${possition[1]}"
     wallCanvas:wallId="${config.wallId}" >
 `
 }

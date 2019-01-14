@@ -1,5 +1,5 @@
-import simplify from '../libs/simplify.js'
 import * as helper from './helper.js'
+import simplify from '../libs/simplify.js'
 
 /*
  * Layer and edge node logic base on jankovicsandras imagetracerjs
@@ -74,7 +74,8 @@ export default class LineTracer {
         else
             traces = paths
         var smoothTraces = this.filterTraces(traces)
-        return smoothTraces
+        var interpolatedTraces = this.interpolateTracePoints(smoothTraces)
+        return interpolatedTraces
     }
 
     // pull out color into layer | Color quantization
@@ -261,6 +262,28 @@ export default class LineTracer {
         }
 
         return traces
+    }
+
+    interpolateTracePoints(traces) {
+        var interpolatedTraces = []
+
+        for (let j = 0; j < traces.length; j++) {
+            interpolatedTraces[j] = []
+            let trace = traces[j]
+            for(let i = 0; i < trace.length-1; i++){
+                var nextPoint = i+1
+                interpolatedTraces[j].push({x: trace[i].x, y: trace[i].y, t: 0})
+                interpolatedTraces[j].push({
+                    x: (trace[i].x + trace[nextPoint].x)/2,
+                    y: (trace[i].y + trace[nextPoint].y)/2,
+                    t: 0
+                })
+            }
+            interpolatedTraces[j].push({x: trace[trace.length-1].x, y: trace[trace.length-1].y, t: 0})
+        }
+
+        if (this.progressReport) this.progressReport.reportIncreaseStep()
+        return interpolatedTraces
     }
 
     filterTraces(traces, tolerance = this.config.traceFilterTolerance) {

@@ -12,6 +12,7 @@ export const defaultPaintingConfig = {
     droneSwapTime: 300000,    // land, swap battery and paint can, takeoff, and resume painting [ms]
     droneTakeoffTime: 140000, // Max duration from drone takeoff to actual painting [ms]
     droneLandingTime: 90000,  // Max time needed to stop painting and land [ms]
+    minimumImageSize: [350,350],    // Min image size to be accepted
 }
 
 export const requiredPaintingConfigParams = [

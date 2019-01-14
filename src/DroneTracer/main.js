@@ -43,17 +43,28 @@ class DroneTracer {
             if(typeof(source) === 'string') imageFile = source 
 
             else {
-                if(!isAnImageFile(source)) helper.reject(reject, 'Not an image file')
+                if(!isAnImageFile(source)) {
+                    helper.reject(reject, 'Not an image file')
+                    return
+                }
                 imageFile = await readImage(source)
             }
 
-            // TODO: calculate size/resolution of source
-            // minimun resolution (too small = no data)
             
 
             // Initialize ImageManager and source image file
             var imageManager = new ImageManager()
             imageManager.source = await ImageManager.base64ToImageData(imageFile)
+
+            // minimun resolution (too small = no data)
+            if( imageManager.source.width < this.paintingConfig.minimumImageSize[0]
+                || imageManager.source.height < this.paintingConfig.minimumImageSize[1]
+            ) {
+                helper.reject(reject,
+                    `Image is too small, minimum image size is ${this.paintingConfig.minimumImageSize}`
+                )
+                return
+            }
 
             progressReport.reportIncreaseStep()
 

@@ -20,20 +20,27 @@ Creating an instance of the *DroneTracer* class requires passing a configuration
 This configurations describes properties of the wall and the painting required by the transformation process and the drone system.
 Multiple instances of the DroneTracer class can be created simultaneously with the same or different configuration.
 
-```javascript
-// Default painting configuration
+```js
+// Painting configuration
 {
-    wallId: 'MX19-001',
-    wallSize: [33000, 50000],   // width [mm], height [mm] (33m x 50m)
-    canvasSize: [33000, 10000], // canvas area size [mm] (33m x 10m)
-    canvasPosition: [0,10000], 	// position of the canvas in the wall [mm]
+    wallId: 'CT19-001',         // required | ID to identify the wall target
+    gpsLocation: [0,0],         // required | wall GPS coordinates [Latitude, Longitude]
+    wallSize: [33000, 50000],   // required | wall width [mm], wall height [mm] (33m x 50m)
+    canvasSize: [33000, 10000], // required | canvas area size [mm] (33m x 10m)
+    canvasPosition: [0,10000], 	// required | relative position of the canvas in the wall [mm]
     colors: ['#000000'],    	// list of available colors
+    strokeWeight: 100           // drone paint stroke thickness [mm]
     droneResolution: 200,   	// drone resolution [mm]
-    strokeWeight: 100      		// drone paint stroke thickness [mm]
+    droneFlyingSpeed: 0.6,      // average drone flying speed [m/s]
+    droneFlightTime: 240000,    // duration of battery flying [ms]
+    droneDrawingTime: 84000,    // average continuous drawing time [ms]
+    droneSwapTime: 300000,      // land, swap battery and paint can, takeoff, and resume painting [ms]
+    droneTakeoffTime: 140000,   // max duration from drone takeoff to actual painting [ms]
+    droneLandingTime: 90000,    // max time needed to stop painting and land [ms]
 }
 ```
 
-Required parameters: *wallId, gpsLocation,wallSize, canvasSize, canvasPosition*
+Required parameters: *wallId, gpsLocation, wallSize, canvasSize, canvasPosition*
 
 
 
@@ -99,7 +106,7 @@ Provides functions to access and modify related information to the svg for the d
 
 **sourceImage**: Getter, original source image
 
-**estimatedTime:** Getter, estimated painting time (milliseconds)
+**estimatedTime:** Getter, estimated painting time (milliseconds). *Includes takeoff, painting and flying time, battery and spray can swapping and landing.*
 
 
 

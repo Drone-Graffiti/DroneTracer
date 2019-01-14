@@ -1,11 +1,6 @@
 import * as svgUtils from './svgutils.js'
 import * as helper from './helper.js'
 
-const calculateEstimatedTime = function(svg) {
-    svg = 0
-    return 3 * 60 * 1000 + svg
-} 
-
 // TODO: Migrate to to HTML element logic? Or keep strings for non Browser platform.
 
 // Drone Paint provides functions to access and modify related information to the svg for the drone
@@ -34,7 +29,7 @@ class DronePaint {
     }
 
     get estimatedTime() {
-        return calculateEstimatedTime(this.svg)
+        return this.estimations.estimatedTime
     }
 
 
@@ -71,19 +66,19 @@ class DronePaint {
 
     calculateSVG() {
         // calculate flyable path
-        this.counts = svgUtils.countTraces(this.traces)
+        var counts = svgUtils.countTraces(this.traces)
 
         var maxX = 0, maxY = 0, minX = 0, minY = 0
         var scale = 1
 
-        if (this.counts > 0) {
+        if (counts.accumulated > 0) {
             // find boundingBox
             var boundingBox = svgUtils.getBoundingBox(this.traces)
             maxX = boundingBox.maxX, maxY = boundingBox.maxY
             minX = boundingBox.minX, minY = boundingBox.minY
 
             // find scale factor
-            var density = this.counts.accumulated / ( (maxX-minX)*(maxY-minY) )
+            var density = counts.accumulated / ( (maxX-minX)*(maxY-minY) )
             var map = helper.map(density, 0, 1, 0, this.paintingConfig.strokeWeight*3)
             scale = (6+map) * this.paintingScale
         }
@@ -103,10 +98,47 @@ class DronePaint {
             this.SVGPaths += svgUtils.traceToSVGPath(trace, scale, {x:minX, y:minY})
         }
 
-        // scale counts
-        this.counts.painting *= scale
-        this.counts.flying *= scale
+        this.calculateEstimatedTime(counts, scale)
+
     }
+
+    calculateEstimatedTime(counts, scale) {
+        this.estimations = {}
+
+        // scale counts
+        counts.painting *= scale
+        counts.flying *= scale
+
+        // m/s == mm/ms
+
+        // just painting time
+        this.estimations.paintingTime = counts.painting / this.paintingConfig.droneFlyingSpeed
+
+        // just flying time, painting and between paths
+        this.estimations.flyingTime = this.estimations.paintingTime
+            + counts.flying / this.paintingConfig.droneFlyingSpeed
+
+        // number of times spray can should be changed
+        var canSwipes = Math.floor(this.estimations.paintingTime/this.paintingConfig.droneDrawingTime)
+
+        // paintingTime + spray can swipe time
+        this.estimations.fullPaintingTime = this.estimations.paintingTime
+            + canSwipes * this.paintingConfig.droneSwapTime
+
+        // number of times battery should be changed
+        var batterySwipes = Math.floor(this.estimations.flyingTime/this.paintingConfig.droneFlightTime)
+
+        // flying time (fly and paint) + battery swipe time
+        this.estimations.fullFlyingTime = this.estimations.fullPaintingTime
+            + batterySwipes * this.paintingConfig.droneSwapTime
+
+        // Total drone painting process estimation time
+        // takeoff, flying + painting, [swaps], landing
+        this.estimations.estimatedTime = this.estimations.fullFlyingTime
+            + this.paintingConfig.droneTakeoffTime
+            + this.paintingConfig.droneLandingTime
+    }
+
 }
 
 export default DronePaint

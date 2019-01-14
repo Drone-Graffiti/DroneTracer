@@ -14,6 +14,7 @@ class DronePaint {
 
         this.paintingColor = this.paintingConfig.colors[0]
         this.paintingScale = 1
+        this.paintingPosition = [0,0]
 
         this.calculateSVG()
     }
@@ -34,17 +35,28 @@ class DronePaint {
 
 
     setPaintingPosition(x, y) {
-        // TODO: check boundaries and calculate relative / absolute positioning
-        this.paintingPosition = [x,y]
-        this.setSVGHeader()
+        // check possitions relative in canvas
+        if (this.checkPaintingPosition([x,y])) {
+            this.paintingPosition = [x,y]
+            this.setSVGHeader()
+            return true
+        }
+        return false
     }
 
     setPaintingScale(scale) {
-        if (scale < 1.0) return
+        if (scale < 1.0) return false
         // The svg is optimized to fit the drone resolution.
         // Scaling down the svg will result into a non flyable path.
-        this.paintingScale = scale
-        this.calculateSVG()
+
+        // check scale smaller than canvas area
+        if (this.checkPaintingPosition(this.paintingPosition, scale)) {
+            this.paintingScale = scale
+            this.calculateSVG()
+            return true
+        }
+
+        return false
     }
 
     setPaintingColor(color) {
@@ -55,13 +67,24 @@ class DronePaint {
     setSVGHeader() {
         this.SVGHeader = svgUtils.getSVGHeader(
             this.paintingWidth, this.paintingHeight,
-            {x:0, y:0}, // painting origin (bottom-left of wall)
+            [this.paintingPosition[0]+this.paintingConfig.canvasPosition[0],
+            this.paintingPosition[1]+this.paintingConfig.canvasPosition[1]], // painting origin (bottom-left of wall)
             this.paintingConfig
         )
     }
 
     setSVGGlobal() {
         this.SVGGlobalStyle = svgUtils.getGlobal(this.paintingColor,this.paintingConfig.strokeWeight)
+    }
+
+    checkPaintingPosition(possition, scale=1) {
+        if ((possition[0] >=0 && possition[1]>=0) &&
+            (possition[0]+this.paintingWidth*scale<=this.paintingConfig.canvasSize[0]
+                && possition[1]+this.paintingHeight*scale<=this.paintingConfig.canvasSize[1])
+        ) {
+            return true
+        }
+        return false
     }
 
     calculateSVG() {

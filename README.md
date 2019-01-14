@@ -70,24 +70,22 @@ The uiParameters getter, exposes the properly parameters, values and ranges for 
 This parameters can be used to build an user interface and allow the user to retouch the results.
 
 ```javascript
-[
-	{
-		label: "Blur Radius",
-		name: "blurKernel",
-		value: 4,
-		type: "range",
-		from: 1,
-		to: 8
-	},
-	{
-		label: "Threshold",
-      	name: "hysteresisHighThreshold",
-      	value: 50,
-      	type: "range",
-      	from: 1,
-      	to: 100
-    }
-]
+[{
+    label: "Blur Radius",
+    name: "blurKernel",
+    value: 4,
+    type: "range",
+    from: 1,
+    to: 8
+},
+{
+    label: "Threshold",
+    name: "hysteresisHighThreshold",
+    value: 50,
+    type: "range",
+    from: 1,
+    to: 100
+}]
 ```
 
 

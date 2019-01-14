@@ -92,7 +92,7 @@ export const countTraces = function(traces) {
     return result
 }
 
-export const getSVGHeader = function(width, height, canvasOrigin = {x:0,y:0}, config) {
+export const getSVGHeader = function(width, height, possition, config) {
     var viewBox = `viewBox="0 0 ${width} ${height}"`
     var size = `width="${width}mm" height="${height}mm"`
 
@@ -105,7 +105,7 @@ export const getSVGHeader = function(width, height, canvasOrigin = {x:0,y:0}, co
     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
     xmlns:svg="http://www.w3.org/2000/svg"
     xmlns:wallCanvas="http://www.drone.paint/"
-    wallCanvas:origin="${canvasOrigin.x} ${canvasOrigin.y}"
+    wallCanvas:origin="${possition[0]} ${possition[1]}"
     wallCanvas:wallId="${config.wallId}" >
 `
 }

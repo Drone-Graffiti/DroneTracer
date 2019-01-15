@@ -117,8 +117,9 @@ class DronePaint {
 
         this.SVGPaths= ''
         for (let trace of this.traces) {
-            //this.SVGPaths += svgUtils.traceToSVGPolyline(trace, scale, {x:minX, y:minY})
-            this.SVGPaths += svgUtils.traceToSVGPath(trace, scale, {x:minX, y:minY})
+            this.SVGPaths += svgUtils.traceToSVGPath(
+                trace, scale, {x:minX, y:minY}, this.paintingConfig
+            )
         }
 
         this.calculateEstimatedTime(counts, scale)

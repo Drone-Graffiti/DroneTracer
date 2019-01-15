@@ -34,7 +34,8 @@ describe('Library', () => {
     describe('#Transform', () => {
         var tracer = new DroneTracer({
             wallId: 1, gpsLocation: [0,0], 
-            wallSize: [0,0], canvasSize: [0, 0], canvasPosition: [0,0]
+            wallSize: [0,0], canvasSize: [0, 0], canvasPosition: [0,0],
+            minimumImageSize: [10,10]
         })
         it('Should check parameters', () => {
             expect(tracer.transform).to.throw()
@@ -63,7 +64,8 @@ describe('Library', () => {
     describe('#DronePaint object', () => {
         var tracer = new DroneTracer({
             wallId: 1, gpsLocation: [0,0], 
-            wallSize: [0,0], canvasSize: [0, 0], canvasPosition: [0,0]
+            wallSize: [0,0], canvasSize: [10000, 20000], canvasPosition: [0,0],
+            minimumImageSize: [10,10]
         })
 
         it('Should not accept negative scaling factors', async ()=> {
@@ -72,6 +74,19 @@ describe('Library', () => {
             dronePaint.setPaintingScale(2)
             dronePaint.setPaintingScale(0.3)
             dronePaint.paintingScale.should.be.equals(2)
+        }).timeout(10000)
+
+        it('Should not accept out of bound parameters', async ()=> {
+            var dronePaint = await tracer.transform(imageFile)
+
+            dronePaint.setPaintingScale(200)
+            dronePaint.paintingScale.should.be.equals(1)
+
+            dronePaint.setPaintingPosition(10000,0)
+            dronePaint.paintingPosition.should.be.eql([0,0])
+
+            dronePaint.setPaintingPosition(1000,0)
+            dronePaint.paintingPosition.should.be.eql([1000,0])
         }).timeout(10000)
     })
 })

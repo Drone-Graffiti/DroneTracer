@@ -19,22 +19,40 @@ export const traceToSVGPolyline = function(trace, scale = 1, origin = {x:0,y:0})
     return ePolylineStr
 }
 
-const traceToBezier = function(trace, scale = 1, origin = {x:0,y:0}) {
-    var bezierCurves = []
+// demove strokes smallers thatn the minimun drone resolution
+const optimizePath = function(trace, config) {
+    var minSize = config.droneResolution + config.dronePrecisionError/2
 
-    var arr = trace.map(t=>[(t.x-origin.x)*scale,(t.y-origin.y)*scale])
-    bezierCurves = polyline2bezier(arr)
+    var bX = trace[0][0], bY = trace[0][1]
+    for (let i = 1; i < trace.length; i++) {
+        bX = trace[i][0] > bX ? trace[i][0] : bX
+        bY = trace[i][1] > bY ? trace[i][1] : bY
+    }
+
+    if (bX < minSize || bY < minSize) return false
+
+    return trace
+}
+
+const traceToBezier = function(trace, scale = 1, origin = {x:0,y:0}, config) {
+    var bezierCurves = false
+
+    var arr = optimizePath(
+        trace.map(t=>[(t.x-origin.x)*scale,(t.y-origin.y)*scale]),
+        config
+    )
+    if (arr) bezierCurves = polyline2bezier(arr)
 
     return bezierCurves
 }
 
-export const traceToSVGPath = function(trace, scale = 1, origin = {x:0,y:0}) {
+export const traceToSVGPath = function(trace, scale = 1, origin = {x:0,y:0}, config) {
     var ePathStr = ''
 
     var ePath_start = '<path d="'
     var ePath_end = '" />'
 
-    var bezierCurves = traceToBezier(trace, scale, origin)
+    var bezierCurves = traceToBezier(trace, scale, origin, config)
     if (bezierCurves) {
         var pathStr = `M${bezierCurves[0][0].x},${bezierCurves[0][0].y} C`
 

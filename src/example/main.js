@@ -199,12 +199,13 @@ function tracerTransform(imagefile) {
 var paintingConfig = {
     wallId: 'MX19-001',
     gpsLocation: [0,0],
-    wallSize: [30000, 20000], // in meters
-    canvasSize: [20000, 20000], // meters
-    canvasPosition: [10000, 0], // meters (origin = [bottom left])
+    wallSize: [30000, 20000],   // in mm
+    canvasSize: [20000, 20000], // mm
+    canvasPosition: [10000, 0], // mm (origin = [bottom left])
     colors: ['#000000', '#eb340f', '#0f71eb'], // default [#000]
-    droneResolution: 200,  // in meters
-    droneFlyingSpeed: 0.3, // average drone flying speed [m/s]
+    droneResolution: 200,       // min distance drone can move, in mm
+    dronePrecisionError: 150,   // error margin, mm
+    droneFlyingSpeed: 0.3,  // average drone flying speed [m/s]
 }
 
 // Instance of a drone tracer

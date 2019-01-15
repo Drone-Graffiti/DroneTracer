@@ -25,6 +25,24 @@ describe('Image Processing', () => {
         })
 	})
 
+	describe('Invert', () => {
+		it('Shoud return an inverted image array', () => {
+            var imageData = [
+                [  0,   0,   0,   0],
+                [255, 255, 255, 255],
+                [100, 200,  50, 150]
+            ]
+            var invertedImg = ImageProcessing.invert(imageData)
+            var expected_image = [
+                [255, 255, 255, 255],
+                [  0,   0,   0,   0],
+                [155,  55, 205, 105]
+            ]
+
+            expect(invertedImg).to.be.eql(expected_image)
+        })
+	})
+
 	describe('Gaussian Blur', () => {
 		it('Shoud return a Gaussian Blur array', () => {
             var grayscaleImg = ImageProcessing.grayscale(imageData)
@@ -75,6 +93,38 @@ describe('Image Processing', () => {
                 [255, 255, 255, 0, 0, 0, 0, 0, 0, 0]
             ]
             expect(thresholdImg).to.be.eql(expected_image)
+        })
+	})
+
+	describe('Dilation', () => {
+		it('Shoud return a dilated image array', () => {
+            var imageData = [
+                [255,  0,  0,  0,  0,  0,255,255,255,255,  0,255],
+                [255,  0,255,255,255,255,255,255,255,255,  0,255],
+                [255,  0,255,255,255,255,255,255,255,255,  0,255],
+                [255,  0,255,255,255,255,255,255,  0,  0,  0,255],
+                [255,255,255,255,255,255,255,  0,  0,  0,255,255],
+                [255,255,255,255,255,255,  0,  0,  0,  0,255,255],
+                [255,255,255,255,255,  0,255,  0,  0,255,255,255],
+                [255,255,255,255,  0,255,255,  0,  0,255,255,255],
+                [255,255,  0,  0,255,255,255,  0,  0,255,255,255],
+                [255,255,255,255,255,255,255,  0,  0,255,255,  0],
+            ]
+            var dilatedImg = ImageProcessing.dilation(imageData, 1)
+            var expected_image = [
+                [  0,  0,  0,  0,  0,  0,  0,255,255,  0,  0,  0],
+                [  0,  0,  0,  0,  0,  0,  0,255,255,  0,  0  ,0],
+                [  0,  0,  0,255,255,255,255,  0,  0,  0,  0,  0],
+                [  0,  0,  0,255,255,255,  0,  0,  0,  0,  0,  0],
+                [  0,  0,  0,255,255,  0,  0,  0,  0,  0,  0,  0],
+                [255,255,255,255,  0,  0,  0,  0,  0,  0,  0,255],
+                [255,255,255,  0,  0,  0,  0,  0,  0,  0,  0,255],
+                [255,  0,  0,  0,  0,  0,  0,  0,  0,  0,255,255],
+                [255,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0],
+                [255,  0,  0,  0,  0,255,  0,  0,  0,  0,  0,  0]
+            ]
+
+            expect(dilatedImg).to.be.eql(expected_image)
         })
 	})
 

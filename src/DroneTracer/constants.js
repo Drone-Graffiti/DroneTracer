@@ -6,6 +6,7 @@ export const defaultPaintingConfig = {
     colors: ['#000000'],    // single black color
     strokeWeight: 100,      // drone paint stroke thickness [mm]
     droneResolution: 200,   // drone resolution [mm]
+    dronePrecisionError: 150, // drone positioning error margin [mm]
     droneFlyingSpeed: 0.4,    // average drone flying speed [m/s]
     droneFlightTime: 240000,  // duration of battery flying [ms]
     droneDrawingTime: 84000,  // average continuous drawing time [ms]

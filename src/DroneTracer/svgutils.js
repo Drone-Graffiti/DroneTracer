@@ -111,7 +111,9 @@ export const countTraces = function(traces) {
 }
 
 export const getSVGHeader = function(width, height, possition, config) {
-    var viewBox = `viewBox="0 0 ${width} ${height}"`
+    var stw = config.strokeWeight
+    var hstw = stw/2
+    var viewBox = `viewBox="-${hstw} -${hstw} ${width+stw} ${height+stw}"`
     var size = `width="${width}mm" height="${height}mm"`
 
     return `<?xml version="1.0" encoding="UTF-8" standalone="no"?>

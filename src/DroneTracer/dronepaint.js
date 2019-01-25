@@ -50,7 +50,8 @@ class DronePaint {
         // Scaling down the svg will result into a non flyable path.
 
         // check scale smaller than canvas area
-        if (this.checkPaintingPosition(this.paintingPosition, scale)) {
+        const incrementalScale = scale / this.paintingScale
+        if (this.checkPaintingPosition(this.paintingPosition, incrementalScale)) {
             this.paintingScale = scale
             this.calculateSVG()
             return true
